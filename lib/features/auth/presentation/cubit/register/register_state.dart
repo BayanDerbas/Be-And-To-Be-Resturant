@@ -10,7 +10,7 @@ abstract class RegisterState extends Equatable{
  class RegisterLoading extends RegisterState {}
 
  class RegisterSuccess extends RegisterState {
-  final RegisterUser registerUser;
+  final RegisterUserEntity registerUser;
 
   RegisterSuccess(this.registerUser);
   @override

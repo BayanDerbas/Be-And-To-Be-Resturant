@@ -1,4 +1,6 @@
-class RegisterUser {
+import 'package:equatable/equatable.dart';
+
+class RegisterUserEntity extends Equatable {
   final String? fullname;
   final String? phonenumber;
   final String? role;
@@ -6,7 +8,7 @@ class RegisterUser {
   final DateTime updated_at;
   final int id;
 
-  RegisterUser({
+  RegisterUserEntity({
     required this.fullname,
     required this.phonenumber,
     required this.role,
@@ -14,4 +16,7 @@ class RegisterUser {
     required this.updated_at,
     required this.id,
   });
+
+  @override
+  List<Object?> get props => [fullname,phonenumber,role,created_at,updated_at,id];
 }

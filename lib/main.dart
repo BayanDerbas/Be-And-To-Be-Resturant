@@ -7,6 +7,7 @@ import 'core/di/injection.dart' as di;
 import 'core/routes/appRouter.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'config/theme/app_theme.dart';
+import 'features/auth/presentation/cubit/login/login_cubit.dart';
 import 'features/auth/presentation/cubit/register/register_cubit.dart';
 import 'features/branch/presentation/cubit/branch_cubit.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<LoginCubit>(create: (_) => di.sl<LoginCubit>()),
         BlocProvider<RegisterCubit>(create: (_) => di.sl<RegisterCubit>()),
         BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
         BlocProvider<BranchCubit>(create: (_) => BranchCubit()),

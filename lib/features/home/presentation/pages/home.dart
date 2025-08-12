@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:web_app/core/constants/app_images.dart';
 import 'package:web_app/features/developers/presentation/developers.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../config/animations/customLottieButton.dart';
-import '../../../order/presentation/pages/order.dart';
 import '../../../privacy/pages/privacy.dart';
 import '../cubit/header/header_cubit.dart';
 import '../cubit/products/products_cubit.dart';

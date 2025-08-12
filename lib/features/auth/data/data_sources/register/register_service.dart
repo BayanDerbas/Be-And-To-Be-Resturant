@@ -1,7 +1,7 @@
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
-import '../../../../core/networks/api_constant.dart';
-import '../models/register_user_model.dart';
+import '../../../../../core/networks/api_constant.dart';
+import '../../models/register/register_user_model.dart';
 
 part 'register_service.g.dart';
 

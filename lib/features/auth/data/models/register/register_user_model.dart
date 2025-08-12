@@ -1,10 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:web_app/features/auth/domain/entities/register_user.dart';
+import 'package:web_app/features/auth/domain/entities/register/register_user.dart';
 
 part 'register_user_model.g.dart';
 
 @JsonSerializable()
-class RegisterUserModel extends RegisterUser {
+class RegisterUserModel extends RegisterUserEntity {
   RegisterUserModel({
     required String fullname,
     required String phonenumber,

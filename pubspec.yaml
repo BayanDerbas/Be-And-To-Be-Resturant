@@ -52,7 +52,7 @@ dependencies:
   json_serializable: ^6.9.5
   retrofit_generator: ^9.7.0
   retrofit: ^4.6.0
-  flutter_secure_storage: ^4.2.1
+  flutter_secure_storage: ^9.2.4
   get_it: ^8.2.0
 
 dev_dependencies:
