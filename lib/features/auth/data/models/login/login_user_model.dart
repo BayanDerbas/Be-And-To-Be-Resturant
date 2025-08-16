@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:web_app/features/auth/domain/entities/login/login_user_entity.dart';
-
 import 'login_user_data.dart';
 
 part 'login_user_model.g.dart';

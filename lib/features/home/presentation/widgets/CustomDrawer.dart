@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/secure_storage.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/logout/logout_cubit.dart';
 
 class CustomDrawer extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -16,8 +18,7 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        final bool isLoggedIn = state is! AuthLoginState && state is! AuthRegisterState && state is! AuthInitial;
-
+        final bool isLoggedIn = state is AuthLoggedIn;
         return Drawer(
           backgroundColor: AppColors.black2,
           child: ListView(
@@ -78,7 +79,9 @@ class CustomDrawer extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    context.read<AuthCubit>().showLogin();
+                    context.read<AuthCubit>().loggedOut();
+                    context.read<LogoutCubit>().logout();
+                    SecureStorage.deleteToken();
                     if (onLogout != null) {
                       onLogout!();
                     }

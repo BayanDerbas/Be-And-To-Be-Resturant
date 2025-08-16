@@ -26,9 +26,9 @@ class Login_SignupPage extends StatelessWidget {
     final responsive = ResponsiveConfig.of(context);
     double containerWidth = responsive.isMobile ? double.infinity : 550;
 
-    return Material(
-      color: AppColors.smooky2,
-      child: Center(
+    return Scaffold(
+      backgroundColor: AppColors.smooky2,
+      body: Center(
         child: Container(
           width: containerWidth,
           height: 750,
@@ -45,7 +45,6 @@ class Login_SignupPage extends StatelessWidget {
 
                     return MultiBlocListener(
                       listeners: [
-                        /// 📌 الاستماع لحالات تسجيل الدخول
                         BlocListener<LoginCubit, LoginState>(
                           listener: (context, loginState) {
                             if (loginState is LoginLoading) {
@@ -60,6 +59,7 @@ class Login_SignupPage extends StatelessWidget {
                             }
 
                             if (loginState is LoginSuccess) {
+                              context.read<AuthCubit>().loggedIn();
                               context.go('/branch_selection');
                             } else if (loginState is LoginFailure) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -68,8 +68,6 @@ class Login_SignupPage extends StatelessWidget {
                             }
                           },
                         ),
-
-                        /// 📌 الاستماع لحالات إنشاء الحساب
                         BlocListener<RegisterCubit, RegisterState>(
                           listener: (context, regState) {
                             if (regState is RegisterLoading) {
@@ -84,6 +82,7 @@ class Login_SignupPage extends StatelessWidget {
                             }
 
                             if (regState is RegisterSuccess) {
+                              context.read<AuthCubit>().loggedIn();
                               context.go('/branch_selection');
                             } else if (regState is RegisterFailure) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -254,14 +253,12 @@ class Login_SignupPage extends StatelessWidget {
                                     phonenumber: phoneController.text,
                                     password: passwordController.text,
                                   );
-                                  log("Success Login");
                                 } else {
                                   context.read<RegisterCubit>().register(
                                     fullname: nameController.text,
                                     phonenumber: phoneController.text,
                                     password: passwordController.text,
                                   );
-                                  log("Success Register");
                                 }
                               },
                               buttonColor: AppColors.amber,

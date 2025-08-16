@@ -12,8 +12,7 @@ class HeaderCubit extends Cubit<HeaderState> {
 
   void changeHeaderColor(double offset) {
     if (offset > 50) {
-      // لو مرق 50 بيكسل من السكرول
-      emit(HeaderChanged(backgroundColor: AppColors.red));
+      emit(HeaderChanged(backgroundColor: AppColors.green));
     } else {
       emit(HeaderChanged(backgroundColor: Colors.transparent));
     }

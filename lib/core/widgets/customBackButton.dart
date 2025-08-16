@@ -18,7 +18,7 @@ class CustomBackButton extends StatelessWidget {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.red,
+              color: AppColors.green,
               borderRadius: BorderRadius.circular(11),
             ),
             child: const Icon(Icons.arrow_forward_ios, color: AppColors.white),

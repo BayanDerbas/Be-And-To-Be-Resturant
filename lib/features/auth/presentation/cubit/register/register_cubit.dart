@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web_app/features/auth/domain/entities/register/register_user.dart';
 import 'package:web_app/features/auth/domain/usecases/register/register_usecase.dart';
 
@@ -13,16 +14,18 @@ class RegisterCubit extends Cubit<RegisterState> {
     required String fullname,
     required String phonenumber,
     required String password,
-}) async {
+  }) async {
     emit(RegisterLoading());
     final result = await registerUseCase(
       fullname: fullname,
       phonenumber: phonenumber,
-      password: password
+      password: password,
     );
     result.fold(
             (failure) => emit(RegisterFailure(failure.message)),
-            (response) => emit(RegisterSuccess(response)),
+            (response) {
+                    emit(RegisterSuccess(response));
+            }
     );
   }
 }

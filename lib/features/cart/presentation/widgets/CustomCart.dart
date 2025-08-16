@@ -181,7 +181,7 @@ class Customcard extends StatelessWidget {
                         style: TextStyle(
                           color: totalPrice >= minOrderPrice
                               ? AppColors.orange
-                              : AppColors.red,
+                              : AppColors.green_,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -201,7 +201,7 @@ class Customcard extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.red,
+                        color: AppColors.green,
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Text(

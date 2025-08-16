@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_images.dart';
 import '../../../../../core/widgets/customButton.dart';
+import '../../../../config/animations/loading.dart';
 import '../cubit/branch_cubit.dart';
 
 class BranchSelectionPage extends StatefulWidget {
@@ -22,8 +23,6 @@ class _BranchSelectionPageState extends State<BranchSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final langCode = Localizations.localeOf(context).languageCode;
-
     return Scaffold(
       backgroundColor: AppColors.smooky,
       body: SingleChildScrollView(
@@ -45,15 +44,18 @@ class _BranchSelectionPageState extends State<BranchSelectionPage> {
               const SizedBox(height: 40),
               BlocBuilder<BranchCubit, BranchState>(
                 builder: (context, state) {
-                  if (state is BranchLoaded) {
+                  if (state is BranchLoading || state is BranchInitial) {
+                    // أول ما يفتح و أثناء التحميل
+                    return LoadinDount();
+                  } else if (state is BranchSuccess) {
                     return Column(
-                      children: state.branches.map((branch) {
+                      children: state.branches.branches.map((branch) {
                         return Column(
                           children: [
                             CustomButton(
                               borderRadius: 20,
                               width: 150,
-                              text: branch.getName(langCode),
+                              text: branch.branch_name ?? 'فرع بدون اسم',
                               onPressed: () {
                                 context.read<BranchCubit>().selectBranch(branch);
                                 context.go('/home');
@@ -64,13 +66,48 @@ class _BranchSelectionPageState extends State<BranchSelectionPage> {
                         );
                       }).toList(),
                     );
-                  } else if (state is BranchInitial) {
-                    return const CircularProgressIndicator();
+                  } else if (state is BranchesFailure) {
+                    return const Text(
+                      "فشل تحميل الأفرع",
+                      style: TextStyle(color: Colors.red, fontSize: 16),
+                    );
                   } else {
-                    return Text("فشل تحميل الافرع");
+                    return const SizedBox.shrink();
                   }
                 },
-              ),
+              )
+
+              // BlocBuilder<BranchCubit, BranchState>(
+              //   builder: (context, state) {
+              //     if (state is BranchSuccess) {
+              //       return Column(
+              //         children: state.branches.branches.map((branch) {
+              //           return Column(
+              //             children: [
+              //               CustomButton(
+              //                 borderRadius: 20,
+              //                 width: 150,
+              //                 text: branch.branch_name.toString(),
+              //                 onPressed: () {
+              //                   context.read<BranchCubit>().selectBranch(branch);
+              //                   context.go('/home');
+              //                 },
+              //               ),
+              //               const SizedBox(height: 20),
+              //             ],
+              //           );
+              //         }).toList(),
+              //       );
+              //     } else if (state is BranchInitial) {
+              //       return LoadinDount();
+              //     } else if(state is BranchLoading){
+              //       return LoadinDount();
+              //     }
+              //     else {
+              //       return Text("فشل تحميل الافرع");
+              //     }
+              //   },
+              // ),
             ],
           ),
         ),

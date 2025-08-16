@@ -10,3 +10,7 @@ class AuthInitial extends AuthState {}
 class AuthLoginState extends AuthState {}
 
 class AuthRegisterState extends AuthState {}
+
+class AuthLoggedIn extends AuthState {}
+
+class AuthLoggedOut extends AuthState {}

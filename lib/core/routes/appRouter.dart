@@ -10,7 +10,7 @@ import '../../features/privacy/pages/privacy.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/login_signup',
     routes: [
       GoRoute(
         path: '/login_signup',

@@ -1,42 +1,29 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:web_app/features/branch/domain/entities/branches_entity.dart';
+import 'package:web_app/features/branch/domain/usecases/branches_usecase.dart';
+
+import '../../data/models/branches_model.dart';
+import '../../domain/entities/branch_entity.dart';
 
 part 'branch_state.dart';
 
 class BranchCubit extends Cubit<BranchState> {
-  BranchCubit() : super(BranchInitial());
+  final BranchesUseCase branchesUseCase;
+  BranchEntity? selectedBranch;
+  BranchCubit(this.branchesUseCase) : super(BranchInitial());
 
   Future<void> fetchBranches() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    final List<BranchModel> fetchedBranches = [
-      BranchModel(id: 1, name: {'ar': 'البلدية', 'en': 'Municipality'}),
-      BranchModel(id: 2, name: {'ar': 'دير عطية', 'en': 'Deir Atiyah'}),
-    ];
-
-    emit(BranchLoaded(fetchedBranches));
-  }
-
-  void selectBranch(BranchModel branch) {
-    emit(BranchSelected(branch));
-  }
-}
-
-class BranchModel extends Equatable {
-  final int id;
-  final Map<String, String> name;
-
-  const BranchModel({required this.id, required this.name});
-
-  factory BranchModel.fromJson(Map<String, dynamic> json) {
-    return BranchModel(
-      id: json['id'],
-      name: Map<String, String>.from(json['name']),
+    emit(BranchLoading());
+    final result = await branchesUseCase();
+    result.fold(
+          (failure) => emit(BranchesFailure(failure.message)),
+          (branchesEntity) => emit(BranchSuccess(branchesEntity)),
     );
   }
 
-  String getName(String langCode) => name[langCode] ?? name['ar'] ?? '';
-
-  @override
-  List<Object?> get props => [id, name];
+  void selectBranch(BranchEntity branch) {
+    selectedBranch = branch;
+    emit(BranchSelected(branch));
+  }
 }

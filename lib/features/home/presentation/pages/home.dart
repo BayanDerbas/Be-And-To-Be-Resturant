@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:web_app/core/constants/app_images.dart';
+import 'package:web_app/features/branch/domain/entities/branch_entity.dart';
 import 'package:web_app/features/developers/presentation/developers.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../config/animations/customLottieButton.dart';
+import '../../../branch/presentation/cubit/branch_cubit.dart';
 import '../../../privacy/pages/privacy.dart';
 import '../cubit/header/header_cubit.dart';
 import '../cubit/products/products_cubit.dart';
@@ -38,6 +40,9 @@ class _HomeState extends State<Home> {
     final productsCubit = context.read<ProductsCubit>();
     final productTypesCubit = context.read<ProductTypesCubit>();
     final responsive = ResponsiveConfig.of(context);
+    final selectedBranch = context.read<BranchCubit>().selectedBranch;
+    context.read<BranchCubit>().fetchBranches();
+    final BranchEntity branch ;
 
     double contentWidth =
     (responsive.isDesktop || responsive.isTablet)
@@ -73,7 +78,7 @@ class _HomeState extends State<Home> {
                 controller: headerCubit.scrollController,
                 child: Column(
                   children: [
-                    CustomBanner(),
+                    CustomBanner(branch: selectedBranch),
                     SizedBox(height: responsive.isMobile ? 5 : 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -126,16 +131,18 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 45),
                     CustomFooter(
-                      phoneNumbers: [
-                        '05050530004',
-                        '05322277790',
-                        '05333388830',
-                      ],
+                      phoneNumbers: (selectedBranch?.phonenumbers ?? [])
+                          .map((phone) => phone.phone.toString())
+                          .toList(),
                       logoAsset: AppImages.logo_header,
-                      facebookUrl: 'https://facebook.com/alhomsi',
-                      instagramUrl: 'https://instagram.com/alhomsi',
-                      mapsUrl: 'https://maps.google.com/?q=alhomsi',
+                      facebookUrl: selectedBranch?.facebooktoken ?? '',
+                      instagramUrl: selectedBranch?.instagramtoken ?? '',
+                      mapsUrl: (selectedBranch?.length != null && selectedBranch?.width != null)
+                          ? "https://maps.google.com/?q=${selectedBranch!.length},${selectedBranch.width}"
+                          : '',
+
                       privacyPolicyText: 'سياسة الخصوصية',
+
                       onPrivacyPolicyTap: () {
                         showDialog(
                           context: context,
@@ -220,7 +227,7 @@ class _HomeState extends State<Home> {
                       },
                       child: const Icon(
                         Icons.keyboard_arrow_up_outlined,
-                        color: AppColors.black1,
+                        color: AppColors.white,
                       ),
                     ),
                   );

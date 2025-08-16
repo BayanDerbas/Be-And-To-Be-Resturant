@@ -27,7 +27,7 @@ class CustomHeader extends StatelessWidget {
         Color headerColor = Colors.transparent;
         if (state is HeaderChanged &&
             state.backgroundColor != Colors.transparent) {
-          headerColor = AppColors.red;
+          headerColor = AppColors.smooky;
         }
         return Positioned(
           top: 0,
@@ -107,11 +107,9 @@ class CustomHeader extends StatelessWidget {
                         ),
                         BlocBuilder<BranchCubit, BranchState>(
                           builder: (context, state) {
-                            String branchName = '.....';
-                            final langCode = Localizations.localeOf(context).languageCode;
-
+                            String branchName = '';
                             if (state is BranchSelected) {
-                              branchName = state.branch.getName(langCode);
+                              branchName = state.branch.branch_name.toString();
                             }
 
                             return Text(

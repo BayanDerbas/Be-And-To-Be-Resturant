@@ -25,9 +25,10 @@ class LoginUserDataEntity extends Equatable {
       fullname: json['fullname'],
       phonenumber: json['phonenumber'],
       role: json['role'],
-      phone_verified_at: json['phone_verified_at'],
-      created_at: DateTime.parse(json['created_at']),
-      updated_at: DateTime.parse(json['updated_at']),
+      phone_verified_at: json['phone_verified_at'] ?? '',
+      created_at: json['created_at'],
+      updated_at: json['updated_at'],
+
     );
   }
 

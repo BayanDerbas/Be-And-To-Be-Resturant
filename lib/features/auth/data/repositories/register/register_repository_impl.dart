@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:web_app/core/networks/failures.dart';
@@ -19,6 +21,7 @@ class RegisterRepositoryImpl implements RegisterRepository {
       final response = await service.register(fullname: fullname, phonenumber: phonenumber, password: password);
       return Right(response);
     } on DioException catch(e){
+      print("Exception Error : ${e}");
       return Left(Failure.fromDioError(e));
     }
     catch (e){

@@ -8,4 +8,8 @@ class AuthCubit extends Cubit<AuthState> {
   void showLogin() => emit(AuthLoginState());
 
   void showRegister() => emit(AuthRegisterState());
+
+  void loggedIn() => emit(AuthLoggedIn());
+
+  void loggedOut() => emit(AuthLoggedOut());
 }
