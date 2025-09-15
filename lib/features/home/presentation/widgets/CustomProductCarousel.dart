@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_images.dart';
+import '../../../../core/networks/api_constant.dart';
 
 class CustomProductCarousel extends StatelessWidget {
-  final List<Map<String, String>> products;
+  final List<ProductCarouselItem> products;
   final int selectedIndex;
   final void Function(int index) onItemSelected;
 
@@ -59,19 +61,27 @@ class CustomProductCarousel extends StatelessWidget {
               child: AnimatedScale(
                 scale: 1.0,
                 duration: const Duration(milliseconds: 300),
-                child: Image.asset(
-                  products[index]['image']!,
+                child: Image.network(
+                  '${ApiConstant.imageBase}/${products[index].imagePath}',
                   width: imageSize,
                   height: imageSize,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      AppImages.donut,
+                      width: imageSize,
+                      height: imageSize,
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
+
             ),
           ),
         ),
       );
     }
-
     stackItems.add(
       AnimatedPositioned(
         key: ValueKey<int>(selectedIndex),
@@ -93,11 +103,19 @@ class CustomProductCarousel extends StatelessWidget {
               child: AnimatedScale(
                 scale: 1.2,
                 duration: const Duration(milliseconds: 300),
-                child: Image.asset(
-                  products[selectedIndex]['image']!,
+                child: Image.network(
+                  '${ApiConstant.imageBase}/${products[selectedIndex].imagePath}',
                   width: imageSize,
                   height: imageSize,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      AppImages.donut,
+                      width: imageSize,
+                      height: imageSize,
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
             ),
@@ -136,7 +154,7 @@ class CustomProductCarousel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            products[selectedIndex]['name']!,
+            products[selectedIndex].name,
             style: const TextStyle(
               fontSize: 28,
               color: AppColors.white,
@@ -147,4 +165,14 @@ class CustomProductCarousel extends StatelessWidget {
       ),
     );
   }
+}
+
+class ProductCarouselItem {
+  final String name;
+  final String imagePath;
+
+  const ProductCarouselItem({
+    required this.name,
+    required this.imagePath,
+  });
 }

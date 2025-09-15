@@ -9,13 +9,13 @@ import '../../domain/entities/branch_entity.dart';
 part 'branch_state.dart';
 
 class BranchCubit extends Cubit<BranchState> {
-  final BranchesUseCase branchesUseCase;
-  BranchEntity? selectedBranch;
-  BranchCubit(this.branchesUseCase) : super(BranchInitial());
+  final BranchesUseCase useCase;
+
+  BranchCubit(this.useCase) : super(BranchInitial());
 
   Future<void> fetchBranches() async {
     emit(BranchLoading());
-    final result = await branchesUseCase();
+    final result = await useCase();
     result.fold(
           (failure) => emit(BranchesFailure(failure.message)),
           (branchesEntity) => emit(BranchSuccess(branchesEntity)),
@@ -23,7 +23,6 @@ class BranchCubit extends Cubit<BranchState> {
   }
 
   void selectBranch(BranchEntity branch) {
-    selectedBranch = branch;
     emit(BranchSelected(branch));
   }
 }

@@ -1,21 +1,26 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:web_app/features/home/domain/entites/main_category_entity.dart';
+import 'package:web_app/features/home/domain/usecases/get_main_categories_usecase.dart';
 
 part 'products_state.dart';
 
 class ProductsCubit extends Cubit<ProductsState> {
-  ProductsCubit() : super(ProductsInitial());
+  final GetMainCategoriesUseCase getMainCategoriesUseCase ;
+  ProductsCubit(this.getMainCategoriesUseCase) : super(ProductsInitial());
 
-  final List<Map<String, String>> _allProducts = [
-    {'image': 'assets/images/pizza.png', 'name': 'بيتزا'},
-    {'image': 'assets/images/donut.png', 'name': 'مناقيش'},
-    {'image': 'assets/images/pizza.png', 'name': 'جبنة'},
-  ];
-
-  void loadProducts() {
+  Future<void> loadProducts(int branch_id) async{
     emit(ProductsLoading());
     try {
-      emit(ProductsLoaded(selectedIndex: 0, products: _allProducts));
+      final result = await getMainCategoriesUseCase(branch_id);
+      result.fold(
+              (failure){
+                emit(ProductsFailure(message: failure.message));
+              },
+          (categories){
+            emit(ProductsLoaded(selectedIndex: 0, categories: categories));
+          },
+      );
     } catch (e) {
       emit(const ProductsFailure(message: 'فشل تحميل المنتجات'));
     }

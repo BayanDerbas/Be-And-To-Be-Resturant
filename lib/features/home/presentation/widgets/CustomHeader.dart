@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_images.dart';
-import '../../../branch/presentation/cubit/branch_cubit.dart';
 import '../../../cart/presentation/pages/cart.dart';
 import '../cubit/header/header_cubit.dart';
+import '../../../branch/presentation/cubit/branch_cubit.dart';
 
 class CustomHeader extends StatelessWidget {
   final VoidCallback? onAboutTap;
@@ -18,17 +18,18 @@ class CustomHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = ResponsiveConfig.of(context);
     final double contentWidth =
-        (responsive.isDesktop || responsive.isTablet)
-            ? 1000
-            : MediaQuery.of(context).size.width;
+    (responsive.isDesktop || responsive.isTablet)
+        ? 1000
+        : MediaQuery.of(context).size.width;
 
     return BlocBuilder<HeaderCubit, HeaderState>(
-      builder: (context, state) {
+      builder: (context, headerState) {
         Color headerColor = Colors.transparent;
-        if (state is HeaderChanged &&
-            state.backgroundColor != Colors.transparent) {
+        if (headerState is HeaderChanged &&
+            headerState.backgroundColor != Colors.transparent) {
           headerColor = AppColors.smooky;
         }
+
         return Positioned(
           top: 0,
           left: 0,
@@ -91,27 +92,25 @@ class CustomHeader extends StatelessWidget {
                           onTap: () => context.go('/branch_selection'),
                           child: Image.asset(
                             AppImages.logo_header,
-                            height:
-                                responsive.isDesktop
-                                    ? 210
-                                    : responsive.isTablet
-                                    ? 210
-                                    : 60,
-                            width:
-                                responsive.isDesktop
-                                    ? 100
-                                    : responsive.isTablet
-                                    ? 150
-                                    : 60,
+                            height: responsive.isDesktop
+                                ? 210
+                                : responsive.isTablet
+                                ? 210
+                                : 60,
+                            width: responsive.isDesktop
+                                ? 100
+                                : responsive.isTablet
+                                ? 150
+                                : 60,
                           ),
                         ),
+                        const SizedBox(width: 8),
                         BlocBuilder<BranchCubit, BranchState>(
                           builder: (context, state) {
                             String branchName = '';
                             if (state is BranchSelected) {
-                              branchName = state.branch.branch_name.toString();
+                              branchName = state.branch.branch_name ?? 'notfhsfsk';
                             }
-
                             return Text(
                               branchName,
                               style: const TextStyle(

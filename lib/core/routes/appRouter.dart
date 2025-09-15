@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:web_app/features/order/presentation/pages/order.dart';
 import '../../features/auth/presentation/pages/login&signup.dart';
+import '../../features/branch/data/models/branch_model.dart';
+import '../../features/branch/domain/entities/branch_entity.dart';
 import '../../features/branch/presentation/pages/branchSelection.dart';
 import '../../features/cart/presentation/pages/cart.dart';
 import '../../features/developers/presentation/developers.dart';
@@ -21,8 +23,11 @@ class AppRouter {
         builder: (context, state) => const BranchSelectionPage(),
       ),
       GoRoute(
-          path: '/home',
-          builder: (context, state) => const Home()
+        path: '/home',
+        builder: (context, state) {
+          final branch = state.extra as BranchEntity?;
+          return Home(selectedBranch: branch);
+        },
       ),
       GoRoute(
         path: '/LoadinDount',

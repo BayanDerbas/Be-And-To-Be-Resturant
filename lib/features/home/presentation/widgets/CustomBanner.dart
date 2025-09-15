@@ -3,54 +3,65 @@ import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_images.dart';
 import '../../../../core/networks/api_constant.dart';
 import '../../../branch/domain/entities/branch_entity.dart';
+import '../../../branch/presentation/cubit/branch_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'CustomRatingSection.dart';
 
 class CustomBanner extends StatelessWidget {
-  final BranchEntity? branch;
-  const CustomBanner({super.key, this.branch});
+  const CustomBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveConfig.of(context);
+
     double imageWidth = (responsive.isDesktop || responsive.isTablet)
         ? 1000
         : MediaQuery.of(context).size.width;
-    double imageHeight = imageWidth / (16 / 9);
 
+    double imageHeight = imageWidth / (16 / 9);
     if (!responsive.isDesktop && !responsive.isTablet && imageHeight < 300) {
       imageHeight = 500;
     }
 
-    // // Default to local asset
-    // ImageProvider imageProvider = AssetImage(AppImages.home);
-    //
-    // // Use branch image if available
-    // if (branch != null && branch!.image != null && branch!.image!.isNotEmpty) {
-    //   final fullImageUrl =
-    //       '${ApiConstant.imageBase}storage/${branch!.image!}';
-    //   imageProvider = NetworkImage(fullImageUrl);
-    // }
+    final branchState = context.watch<BranchCubit>().state;
+    BranchEntity? selectedBranch;
+    if (branchState is BranchSelected) {
+      selectedBranch = branchState.branch;
+      debugPrint("Selected Branch Name: ${selectedBranch.branch_name}");
+    }
+
+    final imageUrl = (selectedBranch?.image != null &&
+        selectedBranch!.image!.isNotEmpty)
+        ? '${ApiConstant.imageBase}/${selectedBranch.image!}'
+        : null;
 
     return Center(
       child: SizedBox(
         width: imageWidth,
         height: imageHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(AppImages.home),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            imageUrl != null
+                ? Image.network(
+              imageUrl,
               fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.4), // درجة البهتان
-                BlendMode.darken, // نوع الدمج
-              ),
-              // onError: (exception, stackTrace) {
-              //   // If the network image fails, replace with local asset
-              //   imageProvider = AssetImage(AppImages.home);
-              // },
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  AppImages.home,
+                  fit: BoxFit.cover,
+                );
+              },
+            )
+                : Image.asset(
+              AppImages.home,
+              fit: BoxFit.cover,
             ),
-          ),
-          child: const Center(child: RatingSection()),
+            const Align(
+              alignment: Alignment.center,
+              child: RatingSection(),
+            ),
+          ],
         ),
       ),
     );

@@ -45,7 +45,10 @@ class $AssetsImagesGen {
       const AssetGenImage('assets/images/instagram.png');
 
   /// File path: assets/images/logo.png
-  AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
+  AssetGenImage get logoPng => const AssetGenImage('assets/images/logo.png');
+
+  /// File path: assets/images/logo_.jpg
+  AssetGenImage get logoJpg => const AssetGenImage('assets/images/logo_.jpg');
 
   /// File path: assets/images/logo_header.png
   AssetGenImage get logoHeader =>
@@ -72,7 +75,8 @@ class $AssetsImagesGen {
     googleMap,
     home,
     instagram,
-    logo,
+    logoPng,
+    logoJpg,
     logoHeader,
     meet,
     pizza,

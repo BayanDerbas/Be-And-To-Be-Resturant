@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:web_app/core/constants/app_images.dart';
+import 'package:web_app/core/networks/api_constant.dart';
 import 'package:web_app/features/branch/domain/entities/branch_entity.dart';
 import 'package:web_app/features/developers/presentation/developers.dart';
+
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../config/animations/customLottieButton.dart';
@@ -25,14 +27,32 @@ import '../widgets/CustomMenuTitle.dart';
 import '../widgets/CustomProductCarousel.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final BranchEntity? selectedBranch;
+
+  const Home({super.key, this.selectedBranch});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  BranchEntity? selectedBranch;
   final GlobalKey _aboutSectionKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    selectedBranch = widget.selectedBranch ??
+        ((context.read<BranchCubit>().state is BranchSelected)
+            ? (context.read<BranchCubit>().state as BranchSelected).branch
+            : null);
+
+    if (selectedBranch != null) {
+      context.read<BranchCubit>().selectBranch(selectedBranch!);
+      context.read<ProductsCubit>().loadProducts(selectedBranch!.id);
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +60,24 @@ class _HomeState extends State<Home> {
     final productsCubit = context.read<ProductsCubit>();
     final productTypesCubit = context.read<ProductTypesCubit>();
     final responsive = ResponsiveConfig.of(context);
-    final selectedBranch = context.read<BranchCubit>().selectedBranch;
-    context.read<BranchCubit>().fetchBranches();
-    final BranchEntity branch ;
 
-    double contentWidth =
-    (responsive.isDesktop || responsive.isTablet)
+    final branchState = context.watch<BranchCubit>().state;
+    BranchEntity? selectedBranch;
+    if (branchState is BranchSelected) {
+      selectedBranch = branchState.branch;
+      debugPrint("✅ Selected Branch: ${selectedBranch.branch_name}");
+      debugPrint("📞 Phones: ${selectedBranch.phonenumbers}");
+      debugPrint("📷 Image: ${ApiConstant.imageBase}/${selectedBranch.image}");
+    }
+
+    double contentWidth = (responsive.isDesktop || responsive.isTablet)
         ? 800
         : MediaQuery.of(context).size.width;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final productsState = productsCubit.state;
       if (productsState is ProductsLoaded) {
-        final productName =
-        productsState.products[productsState.selectedIndex]['name']!;
+        final productName = productsState.categories![productsState.selectedIndex].name;
         productTypesCubit.loadTypesForProduct(productName);
       }
     });
@@ -63,9 +87,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         backgroundColor: AppColors.smooky,
         endDrawer: CustomDrawer(
-          onLogout: () {
-            context.go('/login_signup');
-          },
+          onLogout: () => context.go('/login_signup'),
         ),
         body: NotificationListener<ScrollNotification>(
           onNotification: (scrollNotification) {
@@ -78,7 +100,7 @@ class _HomeState extends State<Home> {
                 controller: headerCubit.scrollController,
                 child: Column(
                   children: [
-                    CustomBanner(branch: selectedBranch),
+                    CustomBanner(),
                     SizedBox(height: responsive.isMobile ? 5 : 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -93,19 +115,27 @@ class _HomeState extends State<Home> {
                               listener: (context, state) {
                                 if (state is ProductsLoaded) {
                                   final productName =
-                                  state.products[state.selectedIndex]['name']!;
-                                  productTypesCubit.loadTypesForProduct(productName);
+                                  state.categories![state.selectedIndex].name;
+                                  productTypesCubit
+                                      .loadTypesForProduct(productName);
                                 }
                               },
                               child: BlocBuilder<ProductsCubit, ProductsState>(
                                 builder: (context, state) {
                                   if (state is ProductsLoaded) {
+                                    final productItems = state.categories!.map((c) {
+                                      return ProductCarouselItem(
+                                        name: c.name ?? '',
+                                        imagePath: c.image ?? AppImages.donut,
+                                      );
+                                    }).toList();
+
                                     return CustomProductCarousel(
-                                      products: state.products,
+                                      products: productItems,
                                       selectedIndex: state.selectedIndex,
                                       onItemSelected: (index) {
                                         productsCubit.changeSelectedIndex(index);
-                                        final productName = state.products[index]['name']!;
+                                        final productName = state.categories![index].name;
                                         productTypesCubit.loadTypesForProduct(productName);
                                       },
                                     );
@@ -137,12 +167,11 @@ class _HomeState extends State<Home> {
                       logoAsset: AppImages.logo_header,
                       facebookUrl: selectedBranch?.facebooktoken ?? '',
                       instagramUrl: selectedBranch?.instagramtoken ?? '',
-                      mapsUrl: (selectedBranch?.length != null && selectedBranch?.width != null)
+                      mapsUrl: (selectedBranch?.length != null &&
+                          selectedBranch?.width != null)
                           ? "https://maps.google.com/?q=${selectedBranch!.length},${selectedBranch.width}"
                           : '',
-
                       privacyPolicyText: 'سياسة الخصوصية',
-
                       onPrivacyPolicyTap: () {
                         showDialog(
                           context: context,
@@ -181,7 +210,8 @@ class _HomeState extends State<Home> {
                                 expand: false,
                                 backgroundColor: Colors.transparent,
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
                                 ),
                               );
                             },

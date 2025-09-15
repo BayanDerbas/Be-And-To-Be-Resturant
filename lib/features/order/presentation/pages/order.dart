@@ -16,7 +16,7 @@ class Order extends StatelessWidget {
     required this.name,
     required this.image,
     required this.types,
-    required int price,  // مش مستخدم بس خليته عشان ماتبطل تجيه اخطاء لو انت مستخدمه برضو
+    required int price,
   });
 
   @override
@@ -31,16 +31,12 @@ class Order extends StatelessWidget {
         builder: (context, state) {
           final cubit = context.read<OrderCubit>();
 
-          // عرض الأنواع الفرعية مباشرة إذا موجودة (مجمعه من كل الأنواع الرئيسية)
           final List<String> subTypes = cubit.allSubTypes;
 
-          // لو فيه أنوع فرعية موجودة نعرضها، غير هيك نعرض الأنواع الرئيسية
           final bool hasSubTypes = subTypes.isNotEmpty;
 
-          // قائمة الأنواع التي سيتم عرضها
           final typesToShow = hasSubTypes ? subTypes : state.types.map((e) => e['name'].toString()).toList();
 
-          // التحديد الحالي سواء في الأنواع الفرعية أو الرئيسية
           final selectedTypeToShow = hasSubTypes ? state.selectedSubType : state.selectedType;
 
           return Padding(
@@ -56,7 +52,6 @@ class Order extends StatelessWidget {
               isSupportedAdded: state.isSupportedAdded,
               onIncrease: cubit.increase,
               onDecrease: cubit.decrease,
-              // نختار الدالة حسب ما إذا كانت الأنواع فرعية معروضة أو رئيسية
               onSelectType: hasSubTypes ? cubit.selectSubType : cubit.selectType,
               onToggleSupport: cubit.toggleSupport,
               onAddToCart: () {
@@ -74,7 +69,6 @@ class Order extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               isAvailable: state.isAvailable,
-              // لازم تمرر subTypes علشان يظهروا تحت "أنواع اللحمة" في CustomOrder لو حبيت تضيفها هناك
               subTypes: subTypes,
               selectedSubType: state.selectedSubType,
               onSelectSubType: cubit.selectSubType,

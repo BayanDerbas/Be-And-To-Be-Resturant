@@ -54,7 +54,7 @@ class AppTheme {
         ),
       ),
 
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: AppColors.white,
         unselectedLabelColor: AppColors.grey,
         indicator: BoxDecoration(
