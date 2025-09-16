@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 
 class Failure {
@@ -30,6 +31,9 @@ class Failure {
       case DioExceptionType.connectionError:
         return Failure('Connection error occurred');
       case DioExceptionType.unknown:
+        if (error.error is SocketException) {
+          return Failure('No Internet connection');
+        }
         return Failure('Unexpected error: ${error.message}');
       default:
         return Failure('Something went wrong');

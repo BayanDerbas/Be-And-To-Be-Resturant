@@ -25,7 +25,15 @@ class AppRouter {
       GoRoute(
         path: '/home',
         builder: (context, state) {
-          final branch = state.extra as BranchEntity?;
+          final extra = state.extra;
+          BranchEntity? branch;
+
+          if (extra is BranchEntity) {
+            branch = extra;
+          } else if (extra is Map<String, dynamic>) {
+            branch = BranchModel.fromJson(extra);
+          }
+
           return Home(selectedBranch: branch);
         },
       ),

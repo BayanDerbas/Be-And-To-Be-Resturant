@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_app/core/constants/app_colors.dart';
 import 'package:web_app/core/constants/app_images.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
+import '../../../../core/networks/api_constant.dart';
 import '../../../order/presentation/pages/order.dart';
 
 class CustomListTypesProductList extends StatelessWidget {
@@ -204,9 +205,9 @@ class CustomListTypesProduct extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: AssetImage(
-                        image.isNotEmpty ? image : AppImages.pizza,
-                      ),
+                      image: image.isNotEmpty
+                          ? NetworkImage("${ApiConstant.imageBase}/$image")
+                          : AssetImage(AppImages.pizza) as ImageProvider,
                       fit: BoxFit.cover,
                     ),
                     boxShadow: [

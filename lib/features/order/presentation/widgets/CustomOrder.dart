@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/networks/api_constant.dart';
 
 class CustomOrder extends StatelessWidget {
   final String name;
@@ -68,21 +69,23 @@ class CustomOrder extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: AssetImage(image),
+                          image: NetworkImage('${ApiConstant.imageBase}/$image'),
                           fit: BoxFit.cover,
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (!isAvailable)
-                      Text(
-                        "غير متاح",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+
+                    // if (!isAvailable)
+                    //   Text(
+                    //     "غير متاح",
+                    //     style: TextStyle(
+                    //       color: Colors.red,
+                    //       fontSize: 16,
+                    //       fontWeight: FontWeight.bold,
+                    //     ),
+                    //   ),
+
                     Text(
                       name,
                       style: const TextStyle(
@@ -103,19 +106,23 @@ class CustomOrder extends StatelessWidget {
                       spacing: 8,
                       children: type.map((t) {
                         final isSelected = t == selectedType;
-                        return ChoiceChip(
-                          label: Text(
-                            t,
-                            style: const TextStyle(color: AppColors.white),
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.orange : AppColors.black2,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          selected: isSelected,
-                          selectedColor: AppColors.orange,
-                          backgroundColor: AppColors.black2,
-                          checkmarkColor: AppColors.white,
-                          onSelected: (_) => onSelectType(t),
+                          child: Text(
+                            t,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         );
                       }).toList(),
                     ),
+
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.center,
@@ -181,7 +188,8 @@ class CustomOrder extends StatelessWidget {
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                        isAvailable ? AppColors.orange : Colors.grey,
+                        AppColors.orange,
+                        //isAvailable ? AppColors.orange : Colors.grey,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -191,7 +199,8 @@ class CustomOrder extends StatelessWidget {
                         color: isAvailable ? AppColors.black1 : Colors.white,
                       ),
                       label: Text(
-                        isAvailable ? "أضف إلى السلة" : "غير متاح",
+                        "أضف الى السلة",
+                       // isAvailable ? "أضف إلى السلة" : "غير متاح",
                         style: TextStyle(
                           color: isAvailable ? AppColors.black1 : Colors.white,
                         ),

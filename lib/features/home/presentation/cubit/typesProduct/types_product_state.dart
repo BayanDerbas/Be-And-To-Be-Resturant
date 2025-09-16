@@ -7,7 +7,7 @@ abstract class ProductTypesState extends Equatable {
 }
 
 class ProductTypesInitial extends ProductTypesState {}
-
+class ProductTypesLoading extends ProductTypesState {}
 class ProductTypesLoaded extends ProductTypesState {
   final List<Map<String, dynamic>> types;
 

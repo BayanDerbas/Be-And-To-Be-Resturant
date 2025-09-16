@@ -77,8 +77,8 @@ class _HomeState extends State<Home> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final productsState = productsCubit.state;
       if (productsState is ProductsLoaded) {
-        final productName = productsState.categories![productsState.selectedIndex].name;
-        productTypesCubit.loadTypesForProduct(productName);
+        final product_id = productsState.categories![productsState.selectedIndex].id;
+        productTypesCubit.loadTypesForProduct(product_id);
       }
     });
 
@@ -114,10 +114,10 @@ class _HomeState extends State<Home> {
                             BlocListener<ProductsCubit, ProductsState>(
                               listener: (context, state) {
                                 if (state is ProductsLoaded) {
-                                  final productName =
-                                  state.categories![state.selectedIndex].name;
+                                  final product_id =
+                                  state.categories![state.selectedIndex].id;
                                   productTypesCubit
-                                      .loadTypesForProduct(productName);
+                                      .loadTypesForProduct(product_id);
                                 }
                               },
                               child: BlocBuilder<ProductsCubit, ProductsState>(
@@ -135,8 +135,8 @@ class _HomeState extends State<Home> {
                                       selectedIndex: state.selectedIndex,
                                       onItemSelected: (index) {
                                         productsCubit.changeSelectedIndex(index);
-                                        final productName = state.categories![index].name;
-                                        productTypesCubit.loadTypesForProduct(productName);
+                                        final product_id = state.categories![index].id;
+                                        productTypesCubit.loadTypesForProduct(product_id);
                                       },
                                     );
                                   }

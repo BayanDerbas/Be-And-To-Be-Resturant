@@ -29,9 +29,14 @@ import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
 import 'package:web_app/features/home/data/repositories/main_category_repository_impl.dart';
 import 'package:web_app/features/home/domain/repositories/main_category_repository.dart';
+import 'package:web_app/features/home/domain/usecases/get_meals_of_category_usecase.dart';
 
+import '../../features/home/data/data_services/meal_service.dart';
+import '../../features/home/data/repositories/meal_repository_impl.dart';
+import '../../features/home/domain/repositories/meal_repository.dart';
 import '../../features/home/domain/usecases/get_main_categories_usecase.dart';
 import '../../features/home/presentation/cubit/products/products_cubit.dart';
+import '../../features/home/presentation/cubit/typesProduct/types_product_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -85,6 +90,11 @@ Future<void> init() async {
     return CategoriesService(dio);
   });
 
+  sl.registerLazySingletonAsync<MealService>(() async {
+    final dio = await sl.getAsync<Dio>();
+    return MealService(dio);
+  });
+
   // ============================
   // Repositories
   // ============================
@@ -113,6 +123,10 @@ Future<void> init() async {
     return MainCategoriesRepositoryImpl(service);
   });
 
+  sl.registerLazySingletonAsync<MealRepository>(() async {
+    final service = await sl.getAsync<MealService>();
+    return MealRepositoryImpl(service);
+  });
 
   // ============================
   // Use Cases
@@ -147,6 +161,11 @@ Future<void> init() async {
     return GetMainCategoriesUseCase(repo);
   });
 
+  sl.registerLazySingletonAsync<GetMealOfCategoryUseCase>(() async {
+    final repo = await sl.getAsync<MealRepository>();
+    return GetMealOfCategoryUseCase(repo);
+  });
+
   // ============================
   // Cubits
   // ============================
@@ -156,4 +175,5 @@ Future<void> init() async {
   sl.registerFactory<RefreshCubit>(() => RefreshCubit(sl<RefreshUseCase>()));
   sl.registerFactory<BranchCubit>(() => BranchCubit(sl<BranchesUseCase>()));
   sl.registerFactory<ProductsCubit>(() => ProductsCubit(sl<GetMainCategoriesUseCase>()));
+  sl.registerFactory<ProductTypesCubit>(() => ProductTypesCubit(sl<GetMealOfCategoryUseCase>()));
 }
