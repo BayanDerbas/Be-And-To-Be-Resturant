@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260214183612",
+    "project_id": "be-and-to-be",
+    "storage_bucket": "be-and-to-be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260214183612:android:23bb5ace68501ac49422b9",
+        "android_client_info": {
+          "package_name": "com.example.web_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcKIEfqhCmXWZa7yLMfEacSii8KgcVm5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

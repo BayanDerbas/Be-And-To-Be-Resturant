@@ -38,18 +38,36 @@ class Cart extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
-                    title: Text('حذف ${item.name}?'),
+                    backgroundColor: AppColors.smooky,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: Text(
+                      '؟ حذف ${item.name}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    actionsAlignment: MainAxisAlignment.spaceBetween,
+                    actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     actions: [
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         onPressed: () {
                           Navigator.of(context).pop();
                           cartCubit.removeItem(item);
                         },
-                        child: const Text('نعم'),
+                        child: const Text('نعم', style: TextStyle(color: Colors.white)),
                       ),
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.green,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('لا'),
+                        child: const Text('لا', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -65,18 +83,36 @@ class Cart extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
-                    title: Text('هل أنت متأكد من حذف ${item.name}?'),
+                    backgroundColor: AppColors.smooky,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: Text(
+                      'هل أنت متأكد من حذف ${item.name}?',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    actionsAlignment: MainAxisAlignment.spaceBetween,
+                    actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     actions: [
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         onPressed: () {
                           Navigator.of(context).pop();
                           cartCubit.removeItem(item);
                         },
-                        child: const Text('نعم'),
+                        child: const Text('نعم', style: TextStyle(color: Colors.white)),
                       ),
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.green,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('لا'),
+                        child: const Text('لا', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),

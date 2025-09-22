@@ -34,6 +34,7 @@ class CartCubit extends Cubit<CartState> {
     if (existingIndex != -1) {
       final existingItem = updatedItems[existingIndex];
       updatedItems[existingIndex] = CartItem(
+        id: existingItem.id,
         name: existingItem.name,
         type: existingItem.type,
         image: existingItem.image,
@@ -68,6 +69,7 @@ class CartCubit extends Cubit<CartState> {
       final updatedItems = List<CartItem>.from(state.items);
       final existing = updatedItems[index];
       updatedItems[index] = CartItem(
+        id: existing.id,
         name: existing.name,
         type: existing.type,
         image: existing.image,
@@ -90,6 +92,7 @@ class CartCubit extends Cubit<CartState> {
 
       if (existing.quantity > 1) {
         updatedItems[index] = CartItem(
+          id: existing.id,
           name: existing.name,
           type: existing.type,
           image: existing.image,

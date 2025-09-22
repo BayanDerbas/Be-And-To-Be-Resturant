@@ -4,6 +4,7 @@ import '../../../../core/networks/api_constant.dart';
 
 class CustomOrder extends StatelessWidget {
   final String name;
+  final String description;
   final List<String> type;
   final String? selectedType;
   final List<String> subTypes;
@@ -12,18 +13,20 @@ class CustomOrder extends StatelessWidget {
   final int quantity;
   final int totalPrice;
   final int unitPrice;
-  final bool isSupportedAdded;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
   final VoidCallback onAddToCart;
-  final VoidCallback onToggleSupport;
   final Function(String) onSelectType;
   final Function(String) onSelectSubType;
   final bool isAvailable;
+  final bool supportAvailable;
+  final bool isSupportedAdded;
+  final VoidCallback onToggleSupport;
 
   const CustomOrder({
     super.key,
     required this.name,
+    required this.description,
     required this.type,
     required this.image,
     required this.quantity,
@@ -34,17 +37,18 @@ class CustomOrder extends StatelessWidget {
     required this.onAddToCart,
     required this.onSelectType,
     required this.selectedType,
-    required this.isSupportedAdded,
-    required this.onToggleSupport,
     required this.isAvailable,
     required this.subTypes,
     required this.selectedSubType,
     required this.onSelectSubType,
+    required this.supportAvailable,
+    required this.isSupportedAdded,
+    required this.onToggleSupport,
   });
 
   @override
   Widget build(BuildContext context) {
-    final computedPrice = quantity * unitPrice + (isSupportedAdded ? 30 : 0);
+    final computedPrice = quantity * unitPrice;
 
     return Center(
       child: Stack(
@@ -75,22 +79,20 @@ class CustomOrder extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // if (!isAvailable)
-                    //   Text(
-                    //     "غير متاح",
-                    //     style: TextStyle(
-                    //       color: Colors.red,
-                    //       fontSize: 16,
-                    //       fontWeight: FontWeight.bold,
-                    //     ),
-                    //   ),
-
                     Text(
                       name,
                       style: const TextStyle(
                         color: AppColors.white,
                         fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 14,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -106,48 +108,48 @@ class CustomOrder extends StatelessWidget {
                       spacing: 8,
                       children: type.map((t) {
                         final isSelected = t == selectedType;
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.orange : AppColors.black2,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            t,
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontWeight: FontWeight.bold,
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () => onSelectType(t),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.orange : AppColors.black2,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              t,
+                              style: const TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         );
                       }).toList(),
                     ),
-
                     const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Column(
-                        children: [
-                          const Text(
-                            "إضافات اختيارية",
-                            style: TextStyle(color: AppColors.white, fontSize: 16),
-                          ),
-                          const SizedBox(height: 8),
-                          ChoiceChip(
-                            label: const Text(
+                    if (supportAvailable) ...[
+                      Align(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
                               "مدعومة",
-                              style: TextStyle(color: AppColors.white),
+                              style: TextStyle(color: AppColors.white, fontSize: 16),
                             ),
-                            selected: isSupportedAdded,
-                            selectedColor: AppColors.orange,
-                            backgroundColor: AppColors.black2,
-                            checkmarkColor: AppColors.white,
-                            onSelected: (_) => onToggleSupport(),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Switch(
+                              value: isSupportedAdded,
+                              onChanged: (_) => onToggleSupport(),
+                              activeColor: AppColors.orange,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                    ],
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -187,9 +189,7 @@ class CustomOrder extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        AppColors.orange,
-                        //isAvailable ? AppColors.orange : Colors.grey,
+                        backgroundColor: AppColors.orange,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -200,7 +200,6 @@ class CustomOrder extends StatelessWidget {
                       ),
                       label: Text(
                         "أضف الى السلة",
-                       // isAvailable ? "أضف إلى السلة" : "غير متاح",
                         style: TextStyle(
                           color: isAvailable ? AppColors.black1 : Colors.white,
                         ),

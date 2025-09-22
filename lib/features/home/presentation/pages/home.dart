@@ -115,7 +115,7 @@ class _HomeState extends State<Home> {
                               listener: (context, state) {
                                 if (state is ProductsLoaded) {
                                   final product_id =
-                                  state.categories![state.selectedIndex].id;
+                                      state.categories![state.selectedIndex].id;
                                   productTypesCubit
                                       .loadTypesForProduct(product_id);
                                 }
@@ -247,7 +247,7 @@ class _HomeState extends State<Home> {
                     bottom: 20,
                     left: leftPosition < 10 ? 10 : leftPosition,
                     child: FloatingActionButton.small(
-                      backgroundColor: AppColors.orange,
+                      backgroundColor: AppColors.green,
                       onPressed: () {
                         headerCubit.scrollController.animateTo(
                           0,

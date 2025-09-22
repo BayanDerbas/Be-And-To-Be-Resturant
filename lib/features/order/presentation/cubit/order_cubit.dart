@@ -1,59 +1,77 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:web_app/features/order/domain/entities/meal_with_types_entity.dart';
+
+import '../../domain/entities/meal_type_entity.dart';
 
 part 'order_state.dart';
 
 class OrderCubit extends Cubit<OrderState> {
-  OrderCubit({
-    required String name,
-    required String image,
-    required List<Map<String, dynamic>> types,
-  }) : super(OrderState(
-    name: name,
-    image: image,
-    types: types,
-    selectedType: null,
+  OrderCubit(MealWithTypesEntity meal)
+      : super(OrderState(
+    meal: meal,
+    selectedType: meal.types?.isNotEmpty == true ? meal.types!.first.name : null,
     selectedSubType: null,
     quantity: 1,
-    unitPrice: int.tryParse(types.isNotEmpty ? types.first['price'].toString() : '0') ?? 0,
-    totalPrice: int.tryParse(types.isNotEmpty ? types.first['price'].toString() : '0') ?? 0,
-    isAvailable: types.any((type) => type['isAvailable'] == true),
+    unitPrice: meal.types?.isNotEmpty == true ? (meal.types!.first.price) : 0,
+    totalPrice: meal.types?.isNotEmpty == true ? (meal.types!.first.price) : 0,
+    isSupportedAdded: false,
+    isAvailable: meal.types?.any((t) => t.available == 1) ?? false,
   ));
+
+  void updateMeal(MealWithTypesEntity meal) {
+    emit(state.copyWith(
+      meal: meal,
+      selectedType: meal.types?.isNotEmpty == true ? meal.types!.first.name : null,
+      selectedSubType: null,
+      quantity: 1,
+      unitPrice: meal.types?.isNotEmpty == true ? (meal.types!.first.price) : 0,
+      totalPrice: meal.types?.isNotEmpty == true ? (meal.types!.first.price) : 0,
+      isSupportedAdded: false,
+      isAvailable: meal.types?.any((t) => t.available == 1) ?? false,
+    ));
+  }
 
   void increase() {
     final newQty = state.quantity + 1;
-    final extra = state.isSupportedAdded ? 30 : 0;
     emit(state.copyWith(
       quantity: newQty,
-      totalPrice: newQty * state.unitPrice + extra,
+      totalPrice: newQty * state.unitPrice,
     ));
   }
 
   void decrease() {
     if (state.quantity > 1) {
       final newQty = state.quantity - 1;
-      final extra = state.isSupportedAdded ? 30 : 0;
       emit(state.copyWith(
         quantity: newQty,
-        totalPrice: newQty * state.unitPrice + extra,
+        totalPrice: newQty * state.unitPrice,
       ));
     }
   }
 
   void selectType(String newType) {
-    final selected = state.types.firstWhere(
-          (t) => t['name'] == newType,
-      orElse: () => {'price': '0', 'subTypes': []},
-    );
+    final List<MealTypeEntity> types = (state.meal.types ?? []).cast<MealTypeEntity>();
+    MealTypeEntity? selected;
+    if (types.isNotEmpty) {
+      final matches = types.where((t) => t.name == newType);
+      selected = matches.isNotEmpty ? matches.first : types.first;
+    }
 
-    final newUnitPrice = int.tryParse(selected['price'].toString()) ?? 0;
-    final extra = state.isSupportedAdded ? 30 : 0;
+    // If support is chosen and the type supports it, use supportprice; else normal price
+    final bool supportAvailableForType = (selected?.supportprice ?? 0) > 0;
+    final bool useSupport = state.isSupportedAdded && supportAvailableForType;
+    final int newUnitPrice = useSupport ? (selected?.supportprice ?? 0) : (selected?.price ?? 0);
+
+    // If selected type does not support supportprice, force isSupportedAdded to false
+    final bool nextIsSupported = supportAvailableForType ? state.isSupportedAdded : false;
 
     emit(state.copyWith(
       selectedType: newType,
-      selectedSubType: null, // رجع الفرعي لـ null لما نغير النوع الرئيسي
+      selectedSubType: null,
       unitPrice: newUnitPrice,
-      totalPrice: newUnitPrice * state.quantity + extra,
+      totalPrice: newUnitPrice * state.quantity,
+      isSupportedAdded: nextIsSupported,
     ));
   }
 
@@ -62,21 +80,40 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void toggleSupport() {
-    final added = !state.isSupportedAdded;
-    final extra = added ? 30 : -30;
+    final List<MealTypeEntity> types = (state.meal.types ?? []).cast<MealTypeEntity>();
+    if (types.isEmpty) return;
+    final MealTypeEntity? selected = types.firstWhere(
+      (t) => t.name == state.selectedType,
+      orElse: () => types.first,
+    );
+    final bool supportAvailableForType = (selected?.supportprice ?? 0) > 0;
+    if (!supportAvailableForType) {
+      // Nothing to toggle
+      return;
+    }
+
+    final bool added = !state.isSupportedAdded;
+    final int newUnitPrice = added ? (selected?.supportprice ?? 0) : (selected?.price ?? 0);
     emit(state.copyWith(
       isSupportedAdded: added,
-      totalPrice: state.totalPrice + extra,
+      unitPrice: newUnitPrice,
+      totalPrice: newUnitPrice * state.quantity,
     ));
   }
 
-  // دالة تجمع كل الأنواع الفرعية لجميع الأنواع الرئيسية
+  bool get supportAvailable {
+    final List<MealTypeEntity> types = (state.meal.types ?? []).cast<MealTypeEntity>();
+    if (types.isEmpty) return false;
+    final MealTypeEntity? selected = types.firstWhere(
+      (t) => t.name == state.selectedType,
+      orElse: () => types.first,
+    );
+    return (selected?.supportprice ?? 0) > 0;
+  }
+
   List<String> get allSubTypes {
-    final List<String> allSubs = [];
-    for (var t in state.types) {
-      final subs = (t['subTypes'] as List?)?.cast<String>() ?? [];
-      allSubs.addAll(subs);
-    }
-    return allSubs.toSet().toList(); // إزالة التكرار
+    // Current API/model does not provide sub-types inside each type.
+    // Return empty list to disable sub-type selection in UI.
+    return const [];
   }
 }

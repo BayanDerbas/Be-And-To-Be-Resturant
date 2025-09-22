@@ -1,5 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_app/features/order/presentation/pages/order.dart';
+import 'package:web_app/features/order/presentation/pages/order_with_meal_id.dart';
 import '../../features/auth/presentation/pages/login&signup.dart';
 import '../../features/branch/data/models/branch_model.dart';
 import '../../features/branch/domain/entities/branch_entity.dart';
@@ -25,8 +26,9 @@ class AppRouter {
       GoRoute(
         path: '/home',
         builder: (context, state) {
-          final extra = state.extra;
           BranchEntity? branch;
+
+          final extra = state.extra;
 
           if (extra is BranchEntity) {
             branch = extra;
@@ -53,12 +55,14 @@ class AppRouter {
         path: '/order',
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
-          return Order(
-            name: args?['name'] ?? '',
-            image: args?['image'] ?? '',
-            price: args?['price'] ?? 0,
-            types: args?['types'] ?? const [],
-          );
+          if (args == null || args['mealId'] == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('خطأ: لم يتم العثور على معرف الوجبة'),
+              ),
+            );
+          }
+          return OrderWithMealId(mealId: args['mealId']);
         },
       ),
       GoRoute(

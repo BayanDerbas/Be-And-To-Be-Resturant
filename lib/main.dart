@@ -1,11 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web_app/core/firebase/firebase_initializer.dart';
 import 'package:web_app/features/auth/presentation/cubit/logout/logout_cubit.dart';
 import 'package:web_app/features/home/domain/usecases/get_main_categories_usecase.dart';
 import 'package:web_app/features/home/domain/usecases/get_meals_of_category_usecase.dart';
 import 'package:web_app/features/home/presentation/cubit/header/header_cubit.dart';
 import 'package:web_app/features/home/presentation/cubit/urlLauncher/url_launcher_cubit.dart';
+import 'package:web_app/features/notifications/data/services/notification_service.dart';
+import 'package:web_app/features/order/domain/usecases/get_types_of_meal_usecase.dart';
+import 'package:web_app/features/order/presentation/cubit/meal_types_cubit/meal_types_cubit.dart';
 import 'config/ResponsiveUI/responsiveConfig.dart';
 import 'core/di/injection.dart' as di;
 import 'core/routes/appRouter.dart';
@@ -27,8 +31,9 @@ import 'features/home/presentation/cubit/typesProduct/types_product_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseInitializer.init();
   await di.init();
-
+  await NotificationService().initNotifications();
   // Wait for all async dependencies
   await di.sl.isReady<Dio>();
   await di.sl.isReady<LoginUseCase>();
@@ -38,6 +43,7 @@ void main() async {
   await di.sl.isReady<BranchesUseCase>();
   await di.sl.isReady<GetMainCategoriesUseCase>();
   await di.sl.isReady<GetMealOfCategoryUseCase>();
+  await di.sl.isReady<GetTypesOfMealUseCase>();
 
   runApp(const MyApp());
 }
@@ -58,6 +64,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<HeaderCubit>(create: (_) => HeaderCubit()),
         BlocProvider<ProductsCubit>(create: (_) => di.sl<ProductsCubit>()),
         BlocProvider<ProductTypesCubit>(create: (_) => di.sl<ProductTypesCubit>()),
+        BlocProvider<MealTypesCubit>(create: (_) => di.sl<MealTypesCubit>()),
         BlocProvider<UrlLauncherCubit>(create: (_) => UrlLauncherCubit()),
         BlocProvider<CartCubit>(create: (_) => CartCubit()),
         BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),

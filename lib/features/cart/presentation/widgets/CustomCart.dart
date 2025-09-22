@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:web_app/core/constants/app_colors.dart';
+import 'package:web_app/core/networks/api_constant.dart';
 import 'package:web_app/core/widgets/customBackButton.dart';
 
 class Customcard extends StatelessWidget {
@@ -69,7 +70,9 @@ class Customcard extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   image: DecorationImage(
-                                    image: AssetImage(item.image),
+                                    image: (item.image.startsWith('http')
+                                        ? NetworkImage(item.image)
+                                        : NetworkImage('${ApiConstant.imageBase}/${item.image}')) as ImageProvider,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -86,7 +89,7 @@ class Customcard extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                       ),
-                                      textDirection: TextDirection.rtl,
+                                      textDirection: TextDirection.ltr,
                                     ),
                                     const SizedBox(height: 6),
                                     if (item.type != null)
@@ -96,13 +99,13 @@ class Customcard extends StatelessWidget {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.orange,
+                                          color: Colors.green,
                                           borderRadius: BorderRadius.circular(25),
                                         ),
                                         child: Text(
                                           item.type!,
                                           style: const TextStyle(
-                                            color: AppColors.black1,
+                                            color: AppColors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
                                           ),
@@ -123,7 +126,7 @@ class Customcard extends StatelessWidget {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10),
                                           decoration: BoxDecoration(
-                                            color: AppColors.orange,
+                                            color: AppColors.green,
                                             borderRadius: BorderRadius.circular(20),
                                           ),
                                           child: Row(
@@ -132,7 +135,7 @@ class Customcard extends StatelessWidget {
                                                 onTap: () => onIncreaseQuantity(item),
                                                 child: const Icon(
                                                   Icons.add,
-                                                  color: AppColors.black1,
+                                                  color: AppColors.white,
                                                   size: 20,
                                                 ),
                                               ),
@@ -140,7 +143,7 @@ class Customcard extends StatelessWidget {
                                               Text(
                                                 '${item.quantity}',
                                                 style: const TextStyle(
-                                                  color: AppColors.black1,
+                                                  color: AppColors.white,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -155,7 +158,7 @@ class Customcard extends StatelessWidget {
                                                 },
                                                 child: Icon(
                                                   item.quantity > 1 ? Icons.remove : Icons.delete,
-                                                  color: item.quantity > 1 ? AppColors.black1 : Colors.red,
+                                                  color: item.quantity > 1 ? AppColors.white : Colors.white,
                                                   size: 20,
                                                 ),
                                               ),
@@ -177,6 +180,13 @@ class Customcard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
+                        '$totalPrice SYR',
+                        style: const TextStyle(
+                          color: AppColors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
                         'السعر الإجمالي',
                         style: TextStyle(
                           color: totalPrice >= minOrderPrice
@@ -185,38 +195,34 @@ class Customcard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '$totalPrice SYR',
-                        style: const TextStyle(
-                          color: AppColors.orange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 5),
                   if (totalPrice < minOrderPrice)
-                    Container(
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.green,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Text(
-                        'الحد الأدنى لسعر الطلب: $minOrderPrice SYR',
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 14,
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Container(
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.green,
+                          borderRadius: BorderRadius.circular(25),
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          'الحد الأدنى لسعر الطلب: $minOrderPrice SYR',
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ElevatedButton(
                     onPressed: totalPrice >= minOrderPrice ? onNext : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orange,
+                      backgroundColor: AppColors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -238,6 +244,7 @@ class Customcard extends StatelessWidget {
 }
 
 class CartItem {
+  final int id;
   final String name;
   final String? type;
   final String image;
@@ -245,6 +252,7 @@ class CartItem {
   final int unitPrice;
 
   CartItem({
+    required this.id,
     required this.name,
     this.type,
     required this.image,
