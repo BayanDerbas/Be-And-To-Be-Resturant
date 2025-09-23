@@ -5,6 +5,9 @@ import '../../../cart/presentation/widgets/CustomCart.dart';
 import '../../domain/entities/meal_with_types_entity.dart';
 import '../cubit/order_cubit.dart';
 import '../widgets/CustomOrder.dart';
+import 'package:web_app/core/networks/api_constant.dart';
+import 'package:web_app/core/networks/dio_factory.dart';
+import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
  
 
 class Order extends StatelessWidget {
@@ -47,22 +50,52 @@ class Order extends StatelessWidget {
                 onSelectType: hasSubTypes
                     ? orderCubit.selectSubType
                     : orderCubit.selectType,
-                onAddToCart: () {
+                onAddToCart: () async {
                   if (!orderState.isAvailable) return;
+                  try {
+                    final selectedTypeEntity = meal.types?.firstWhere(
+                          (t) => t.name == (selectedTypeToShow ?? ''),
+                          orElse: () => meal.types!.first,
+                    );
+                    final typeId = selectedTypeEntity?.id ?? 0;
 
-                  final cart = context.read<CartCubit>();
-                  cart.addItem(
-                    CartItem(
-                      id: meal.id,
-                      name: meal.name,
-                      type: selectedTypeToShow ?? '',
-                      image: meal.image,
-                      quantity: orderState.quantity,
-                      unitPrice: orderState.unitPrice,
-                    ),
-                  );
+                    // Branch id from BranchCubit if selected
+                    int branchId = 0;
+                    final branchState = context.read<BranchCubit>().state;
+                    if (branchState is BranchSelected) {
+                      branchId = branchState.branch.id;
+                    }
 
-                  Navigator.of(context).pop();
+                    final dio = await DioFactory.getDio();
+                    await dio.get(
+                      ApiConstant.addToCart,
+                      queryParameters: {
+                        'type_id': typeId,
+                        'amount': orderState.quantity,
+                        'price': orderState.totalPrice,
+                        'extra': orderState.isSupportedAdded ? 1 : 0,
+                        'branch_id': branchId,
+                      },
+                    );
+
+                    final cart = context.read<CartCubit>();
+                    cart.addItem(
+                      CartItem(
+                        id: meal.id,
+                        name: meal.name,
+                        type: selectedTypeToShow ?? '',
+                        image: meal.image,
+                        quantity: orderState.quantity,
+                        unitPrice: orderState.unitPrice,
+                      ),
+                    );
+
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('فشل إضافة الوجبة إلى السلة')), 
+                    );
+                  }
                 },
                 isAvailable: orderState.isAvailable,
                 subTypes: subTypes,
@@ -79,257 +112,3 @@ class Order extends StatelessWidget {
     );
   }
 }
-
-
-// class Order extends StatelessWidget {
-//   final int mealId;
-//
-//   const Order({super.key, required this.mealId});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocProvider<MealTypesCubit>(
-//       create: (_) => di.sl<MealTypesCubit>()..getMealsTypes(mealId),
-//       child: BlocBuilder<MealTypesCubit, MealTypesState>(
-//         builder: (context, mealTypesState) {
-//           if (mealTypesState is MealTypesLoading) {
-//             return const Scaffold(
-//               body: Center(child: CircularProgressIndicator()),
-//             );
-//           }
-//
-//           if (mealTypesState is MealTypesFailure) {
-//             return Scaffold(
-//               body: Center(
-//                 child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     const Icon(Icons.error_outline, size: 64, color: Colors.red),
-//                     const SizedBox(height: 16),
-//                     Text(
-//                       'خطأ في تحميل البيانات',
-//                       style: Theme.of(context).textTheme.headlineSmall,
-//                     ),
-//                     const SizedBox(height: 8),
-//                     Text(
-//                       mealTypesState.message,
-//                       style: Theme.of(context).textTheme.bodyMedium,
-//                       textAlign: TextAlign.center,
-//                     ),
-//                     const SizedBox(height: 16),
-//                     ElevatedButton(
-//                       onPressed: () {
-//                         context.read<MealTypesCubit>().getMealsTypes(mealId);
-//                       },
-//                       child: const Text('إعادة المحاولة'),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           }
-//
-//           if (mealTypesState is MealTypesSuccess) {
-//             final meal = mealTypesState.meals;
-//
-//             // Create OrderCubit after we have meal data
-//             return BlocProvider<OrderCubit>(
-//               create: (_) => OrderCubit(meal),
-//               child: BlocBuilder<OrderCubit, OrderState>(
-//                 builder: (context, orderState) {
-//                   final orderCubit = context.read<OrderCubit>();
-//                   final List<String> subTypes = orderCubit.allSubTypes;
-//                   final bool hasSubTypes = subTypes.isNotEmpty;
-//
-//                   final typesToShow =
-//                   hasSubTypes ? subTypes : meal.types?.map((e) => e.name).toList() ?? [];
-//
-//                   final selectedTypeToShow =
-//                   hasSubTypes ? orderState.selectedSubType : orderState.selectedType;
-//
-//                   return Scaffold(
-//                     backgroundColor: Colors.transparent,
-//                     body: Padding(
-//                       padding: const EdgeInsets.all(16.0),
-//                       child: CustomOrder(
-//                         name: meal.name,
-//                         image: meal.image,
-//                         type: typesToShow,
-//                         selectedType: selectedTypeToShow,
-//                         quantity: orderState.quantity,
-//                         totalPrice: orderState.totalPrice,
-//                         unitPrice: orderState.unitPrice,
-//                         isSupportedAdded: orderState.isSupportedAdded,
-//                         onIncrease: orderCubit.increase,
-//                         onDecrease: orderCubit.decrease,
-//                         onSelectType: hasSubTypes ? orderCubit.selectSubType : orderCubit.selectType,
-//                         onToggleSupport: orderCubit.toggleSupport,
-//                         onAddToCart: () {
-//                           if (!orderState.isAvailable) return;
-//
-//                           final cart = context.read<CartCubit>();
-//                           cart.addItem(CartItem(
-//                             id: meal.id,
-//                             name: meal.name,
-//                             type: selectedTypeToShow ?? '',
-//                             image: meal.image,
-//                             quantity: orderState.quantity,
-//                             unitPrice: orderState.unitPrice +
-//                                 (orderState.isSupportedAdded ? 30 : 0),
-//                           ));
-//
-//                           Navigator.of(context).pop();
-//                         },
-//                         isAvailable: orderState.isAvailable,
-//                         subTypes: subTypes,
-//                         selectedSubType: orderState.selectedSubType,
-//                         onSelectSubType: orderCubit.selectSubType,
-//                       ),
-//                     ),
-//                   );
-//                 },
-//               ),
-//             );
-//           }
-//
-//           return const Scaffold(
-//             body: Center(child: Text('حالة غير معروفة')),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
-// class Order extends StatelessWidget {
-//   final int mealId;
-//
-//   const Order({
-//     super.key,
-//     required this.mealId,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiBlocProvider(
-//       providers: [
-//         BlocProvider<MealTypesCubit>(
-//           create: (_) => di.sl<MealTypesCubit>()..getMealsTypes(mealId),
-//         ),
-//         BlocProvider<OrderCubit>(
-//           create: (_) => OrderCubit(),
-//         ),
-//       ],
-//       child: BlocBuilder<MealTypesCubit, MealTypesState>(
-//         builder: (context, mealTypesState) {
-//           if (mealTypesState is MealTypesLoading) {
-//             return const Scaffold(
-//               body: Center(
-//                 child: CircularProgressIndicator(),
-//               ),
-//             );
-//           }
-//
-//           if (mealTypesState is MealTypesFailure) {
-//             return Scaffold(
-//               body: Center(
-//                 child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     const Icon(
-//                       Icons.error_outline,
-//                       size: 64,
-//                       color: Colors.red,
-//                     ),
-//                     const SizedBox(height: 16),
-//                     Text(
-//                       'خطأ في تحميل البيانات',
-//                       style: Theme.of(context).textTheme.headlineSmall,
-//                     ),
-//                     const SizedBox(height: 8),
-//                     Text(
-//                       mealTypesState.message,
-//                       style: Theme.of(context).textTheme.bodyMedium,
-//                       textAlign: TextAlign.center,
-//                     ),
-//                     const SizedBox(height: 16),
-//                     ElevatedButton(
-//                       onPressed: () {
-//                         context.read<MealTypesCubit>().getMealsTypes(mealId);
-//                       },
-//                       child: const Text('إعادة المحاولة'),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           }
-//
-//           if (mealTypesState is MealTypesSuccess) {
-//             return BlocBuilder<OrderCubit, OrderState>(
-//               builder: (context, orderState) {
-//                 final orderCubit = context.read<OrderCubit>();
-//                 final meal = mealTypesState.meals;
-//
-//                 // تحديث OrderCubit بالبيانات الجديدة
-//                 if (orderState.meal.id != meal.id) {
-//                   orderCubit.updateMeal(meal);
-//                 }
-//
-//                 final List<String> subTypes = orderCubit.allSubTypes;
-//                 final bool hasSubTypes = subTypes.isNotEmpty;
-//
-//                 final typesToShow = hasSubTypes ? subTypes : meal.types?.map((e) => e.name).toList() ?? [];
-//
-//                 final selectedTypeToShow = hasSubTypes ? orderState.selectedSubType : orderState.selectedType;
-//
-//                 return Padding(
-//                   padding: const EdgeInsets.all(16.0),
-//                   child: CustomOrder(
-//                     name: meal.name,
-//                     image: meal.image,
-//                     type: typesToShow,
-//                     selectedType: selectedTypeToShow,
-//                     quantity: orderState.quantity,
-//                     totalPrice: orderState.totalPrice,
-//                     unitPrice: orderState.unitPrice,
-//                     isSupportedAdded: orderState.isSupportedAdded,
-//                     onIncrease: orderCubit.increase,
-//                     onDecrease: orderCubit.decrease,
-//                     onSelectType: hasSubTypes ? orderCubit.selectSubType : orderCubit.selectType,
-//                     onToggleSupport: orderCubit.toggleSupport,
-//                     onAddToCart: () {
-//                       if (!orderState.isAvailable) return;
-//
-//                       final cart = context.read<CartCubit>();
-//                       cart.addItem(CartItem(
-//                         id: meal.id,
-//                         name: meal.name,
-//                         type: selectedTypeToShow ?? '',
-//                         image: meal.image,
-//                         quantity: orderState.quantity,
-//                         unitPrice: orderState.unitPrice + (orderState.isSupportedAdded ? 30 : 0),
-//                       ));
-//
-//                       Navigator.of(context).pop();
-//                     },
-//                     isAvailable: orderState.isAvailable,
-//                     subTypes: subTypes,
-//                     selectedSubType: orderState.selectedSubType,
-//                     onSelectSubType: orderCubit.selectSubType,
-//                   ),
-//                 );
-//               },
-//             );
-//           }
-//
-//           return const Scaffold(
-//             body: Center(
-//               child: Text('حالة غير معروفة'),
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }

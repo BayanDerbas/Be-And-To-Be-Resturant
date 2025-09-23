@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:web_app/features/order/domain/entities/meal_with_types_entity.dart';
-
 import '../../domain/entities/meal_type_entity.dart';
 
 part 'order_state.dart';
