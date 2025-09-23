@@ -13,10 +13,17 @@ class Cart extends StatelessWidget {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
         final cartCubit = context.read<CartCubit>();
+        
+        // Handle different cart states
+        if (state is! CartInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        final cartState = state;
         final tableController = TextEditingController(
-          text: state.tableNumber ?? '',
+          text: cartState.tableNumber ?? '',
         );
-        final noteController = TextEditingController(text: state.note ?? '');
+        final noteController = TextEditingController(text: cartState.note ?? '');
 
         final screenWidth = MediaQuery.of(context).size.width;
         final containerWidth = screenWidth > 1000 ? 900.0 : screenWidth * 0.9;
@@ -31,9 +38,9 @@ class Cart extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Customcard(
-              items: state.items,
-              totalPrice: state.totalPrice,
-              minOrderPrice: state.minOrderPrice,
+              items: cartState.items,
+              totalPrice: cartState.totalPrice,
+              minOrderPrice: cartState.minOrderPrice,
               onItemTap: (item) {
                 showDialog(
                   context: context,
@@ -199,9 +206,9 @@ class Cart extends StatelessWidget {
                                         title: 'طلب إرسال إلى عنوان',
                                         includeAddress: true,
                                         includeTableNumber: false,
-                                        totalPrice: state.totalPrice,
-                                        selectedCoupon: state.selectedCoupon,
-                                        availableCoupons: state.coupons,
+                                        totalPrice: cartState.totalPrice,
+                                        selectedCoupon: cartState.selectedCoupon,
+                                        availableCoupons: cartState.coupons,
                                         onSelectCoupon: (coupon) {
                                           cartCubit.selectCoupon(coupon);
                                         },
@@ -215,9 +222,9 @@ class Cart extends StatelessWidget {
                                         title: 'طلب استلام ذاتي',
                                         includeAddress: false,
                                         includeTableNumber: false,
-                                        totalPrice: state.totalPrice,
-                                        selectedCoupon: state.selectedCoupon,
-                                        availableCoupons: state.coupons,
+                                        totalPrice: cartState.totalPrice,
+                                        selectedCoupon: cartState.selectedCoupon,
+                                        availableCoupons: cartState.coupons,
                                         onSelectCoupon: (coupon) {
                                           cartCubit.selectCoupon(coupon);
                                         },
@@ -230,9 +237,9 @@ class Cart extends StatelessWidget {
                                         title: 'طلب على الطاولة',
                                         includeAddress: false,
                                         includeTableNumber: true,
-                                        totalPrice: state.totalPrice,
-                                        selectedCoupon: state.selectedCoupon,
-                                        availableCoupons: state.coupons,
+                                        totalPrice: cartState.totalPrice,
+                                        selectedCoupon: cartState.selectedCoupon,
+                                        availableCoupons: cartState.coupons,
                                         onSelectCoupon: (coupon) {
                                           cartCubit.selectCoupon(coupon);
                                         },

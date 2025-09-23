@@ -41,6 +41,11 @@ import '../../features/home/presentation/cubit/products/products_cubit.dart';
 import '../../features/home/presentation/cubit/typesProduct/types_product_cubit.dart';
 import '../../features/order/presentation/cubit/meal_types_cubit/meal_types_cubit.dart';
 import '../../features/order/domain/usecases/get_types_of_meal_usecase.dart';
+import '../../features/cart/data/data_sources/cart_service.dart';
+import '../../features/cart/data/repositories/cart_repository_impl.dart';
+import '../../features/cart/domain/repositories/cart_repository.dart';
+import '../../features/cart/domain/usecases/add_to_cart_usecase.dart';
+import '../../features/cart/presentation/cubit/cart_cubit.dart';
 
 
 final sl = GetIt.instance;
@@ -103,6 +108,10 @@ Future<void> init() async {
     final dio = await sl.getAsync<Dio>();
     return MealTypesService(dio);
   });
+  sl.registerLazySingletonAsync<CartService>(() async {
+    final dio = await sl.getAsync<Dio>();
+    return CartService(dio);
+  });
   // ============================
   // Repositories
   // ============================
@@ -138,6 +147,10 @@ Future<void> init() async {
   sl.registerLazySingletonAsync<MealTypesRepository>(() async {
     final service = await sl.getAsync<MealTypesService>();
     return MealTypesRepositoryImpl(service);
+  });
+  sl.registerLazySingletonAsync<CartRepository>(() async {
+    final service = await sl.getAsync<CartService>();
+    return CartRepositoryImpl(service);
   });
   // ============================
   // Use Cases
@@ -180,8 +193,10 @@ Future<void> init() async {
     final repo = await sl.getAsync<MealTypesRepository>();
     return GetTypesOfMealUseCase(repo);
   });
-  
-
+  sl.registerLazySingletonAsync<AddToCartUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return AddToCartUseCase(repo);
+  });
   // ============================
   // Cubits
   // ============================
@@ -193,4 +208,5 @@ Future<void> init() async {
   sl.registerFactory<ProductsCubit>(() => ProductsCubit(sl<GetMainCategoriesUseCase>()));
   sl.registerFactory<ProductTypesCubit>(() => ProductTypesCubit(sl<GetMealOfCategoryUseCase>()));
   sl.registerFactory<MealTypesCubit>(() => MealTypesCubit(sl<GetTypesOfMealUseCase>()));
+  sl.registerFactory<CartCubit>(() => CartCubit(sl<CartRepository>()));
 }

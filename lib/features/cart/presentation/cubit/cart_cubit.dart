@@ -1,36 +1,76 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
+import '../../domain/repositories/cart_repository.dart';
 import '../widgets/CustomCart.dart';
 
 part 'cart_state.dart';
 
 class CartCubit extends Cubit<CartState> {
+  final CartRepository repository;
 
-  CartCubit()
-      : super(const CartState(
+  CartCubit(this.repository)
+      : super(CartInitial(
     items: [],
     totalPrice: 0,
     minOrderPrice: 50,
   ));
 
+  Future<void> addToCartApi({
+    required int typeId,
+    required int amount,
+    required int price,
+    required int extra,
+    required int branchId,
+    CartItem? itemToAdd,
+  }) async {
+    emit(CartLoading());
+    final result = await repository.addToCart(
+      type_id: typeId,
+      amount: amount,
+      price: price,
+      extra: extra,
+      branch_id: branchId,
+    );
+
+    result.fold(
+      (failure) => emit(CartError(failure.message)),
+      (entity) {
+        if (itemToAdd != null) {
+          addItem(itemToAdd);
+        }
+        emit(CartSuccess(entity));
+      },
+    );
+  }
+
   void selectCoupon(String coupon) {
-    emit(state.copyWith(selectedCoupon: coupon));
+    if (state is CartInitial) {
+      emit((state as CartInitial).copyWith(selectedCoupon: coupon));
+    }
   }
 
   void updateTableNumber(String number) {
-    emit(state.copyWith(tableNumber: number));
+    if (state is CartInitial) {
+      emit((state as CartInitial).copyWith(tableNumber: number));
+    }
   }
 
   void updateNote(String note) {
-    emit(state.copyWith(note: note));
+    if (state is CartInitial) {
+      emit((state as CartInitial).copyWith(note: note));
+    }
   }
 
   void addItem(CartItem item) {
-    final existingIndex = state.items.indexWhere((i) =>
+    if (state is! CartInitial) return;
+    
+    final currentState = state as CartInitial;
+    final existingIndex = currentState.items.indexWhere((i) =>
     i.name == item.name &&
         i.type == item.type);
 
-    List<CartItem> updatedItems = List.from(state.items);
+    List<CartItem> updatedItems = List.from(currentState.items);
     if (existingIndex != -1) {
       final existingItem = updatedItems[existingIndex];
       updatedItems[existingIndex] = CartItem(
@@ -46,27 +86,35 @@ class CartCubit extends Cubit<CartState> {
     }
 
     final newTotal = _calculateTotal(updatedItems);
-    emit(state.copyWith(items: updatedItems, totalPrice: newTotal));
+    emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
   }
 
   void removeItem(CartItem item) {
-    final updatedItems = state.items.where((i) =>
+    if (state is! CartInitial) return;
+    
+    final currentState = state as CartInitial;
+    final updatedItems = currentState.items.where((i) =>
     !(i.name == item.name && i.type == item.type)).toList();
 
     final newTotal = _calculateTotal(updatedItems);
-    emit(state.copyWith(items: updatedItems, totalPrice: newTotal));
+    emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
   }
 
   void clearCart() {
-    emit(state.copyWith(items: [], totalPrice: 0));
+    if (state is CartInitial) {
+      emit((state as CartInitial).copyWith(items: [], totalPrice: 0));
+    }
   }
 
   void increaseQuantity(CartItem item) {
-    final index = state.items.indexWhere((i) =>
+    if (state is! CartInitial) return;
+    
+    final currentState = state as CartInitial;
+    final index = currentState.items.indexWhere((i) =>
     i.name == item.name && i.type == item.type);
 
     if (index != -1) {
-      final updatedItems = List<CartItem>.from(state.items);
+      final updatedItems = List<CartItem>.from(currentState.items);
       final existing = updatedItems[index];
       updatedItems[index] = CartItem(
         id: existing.id,
@@ -78,16 +126,19 @@ class CartCubit extends Cubit<CartState> {
       );
 
       final newTotal = _calculateTotal(updatedItems);
-      emit(state.copyWith(items: updatedItems, totalPrice: newTotal));
+      emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
     }
   }
 
   void decreaseOrRemoveItem(CartItem item) {
-    final index = state.items.indexWhere((i) =>
+    if (state is! CartInitial) return;
+    
+    final currentState = state as CartInitial;
+    final index = currentState.items.indexWhere((i) =>
     i.name == item.name && i.type == item.type);
 
     if (index != -1) {
-      final updatedItems = List<CartItem>.from(state.items);
+      final updatedItems = List<CartItem>.from(currentState.items);
       final existing = updatedItems[index];
 
       if (existing.quantity > 1) {
@@ -104,7 +155,7 @@ class CartCubit extends Cubit<CartState> {
       }
 
       final newTotal = _calculateTotal(updatedItems);
-      emit(state.copyWith(items: updatedItems, totalPrice: newTotal));
+      emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
     }
   }
 

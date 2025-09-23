@@ -1,44 +1,69 @@
 part of 'cart_cubit.dart';
 
-class CartState extends Equatable {
+abstract class CartState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+class CartInitial extends CartState {
   final List<CartItem> items;
   final int totalPrice;
   final int minOrderPrice;
-  final List<String> coupons;
   final String? selectedCoupon;
   final String? tableNumber;
   final String? note;
+  final List<String> coupons;
 
-  const CartState({
-    required this.items,
-    required this.totalPrice,
-    required this.minOrderPrice,
-    this.coupons = const ['10% خصم', 'توصيل مجاني', 'اشترِ 1 واحصل على 1 مجانًا'],
+  CartInitial({
+    this.items = const [],
+    this.totalPrice = 0,
+    this.minOrderPrice = 50,
     this.selectedCoupon,
     this.tableNumber,
     this.note,
+    this.coupons = const [],
   });
 
-  CartState copyWith({
+  CartInitial copyWith({
     List<CartItem>? items,
     int? totalPrice,
     int? minOrderPrice,
-    List<String>? coupons,
     String? selectedCoupon,
     String? tableNumber,
     String? note,
+    List<String>? coupons,
   }) {
-    return CartState(
+    return CartInitial(
       items: items ?? this.items,
       totalPrice: totalPrice ?? this.totalPrice,
       minOrderPrice: minOrderPrice ?? this.minOrderPrice,
-      coupons: coupons ?? this.coupons,
       selectedCoupon: selectedCoupon ?? this.selectedCoupon,
       tableNumber: tableNumber ?? this.tableNumber,
       note: note ?? this.note,
+      coupons: coupons ?? this.coupons,
     );
   }
 
   @override
-  List<Object?> get props => [items, totalPrice, minOrderPrice, coupons, selectedCoupon, tableNumber, note];
+  List<Object?> get props => [items, totalPrice, minOrderPrice, selectedCoupon, tableNumber, note, coupons];
+}
+
+class CartLoading extends CartState {}
+
+class CartSuccess extends CartState {
+  final AddToCartResponseEntity entity;
+
+  CartSuccess(this.entity);
+
+  @override
+  List<Object?> get props => [entity];
+}
+
+class CartError extends CartState {
+  final String message;
+
+  CartError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

@@ -8,9 +8,9 @@ class MealTypeModel extends MealTypeEntity {
   const MealTypeModel({
     required int id,
     required String name,
-    @JsonKey(defaultValue: 0) int? available,
-    @JsonKey(defaultValue: 0) int? price,
-    @JsonKey(defaultValue: 0) int? supportprice,
+    int? available,
+    int? price,
+    int? supportprice,
     required int meal_id,
   }) : super(
     id: id,

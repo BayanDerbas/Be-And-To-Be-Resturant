@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'meal_types_service.dart';
+part of 'cart_service.dart';
 
 // **************************************************************************
 // RetrofitGenerator
@@ -8,8 +8,8 @@ part of 'meal_types_service.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter
 
-class _MealTypesService implements MealTypesService {
-  _MealTypesService(this._dio, {this.baseUrl, this.errorLogger}) {
+class _CartService implements CartService {
+  _CartService(this._dio, {this.baseUrl, this.errorLogger}) {
     baseUrl ??= 'http://127.0.0.1:8000/api';
   }
 
@@ -20,25 +20,42 @@ class _MealTypesService implements MealTypesService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<dynamic>> getTypesOfMeal(int meal_id) async {
+  Future<AddToCartResponseModel> addToCart(
+    int type_id,
+    int amount,
+    int price,
+    int extra,
+    int branch_id,
+  ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'type_id': type_id,
+      r'amount': amount,
+      r'price': price,
+      r'extra': extra,
+      r'branch_id': branch_id,
+    };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<dynamic>>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+    final _options = _setStreamType<AddToCartResponseModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'http://127.0.0.1:8000/api/gettypesofmeal/${meal_id}',
+            'http://127.0.0.1:8000/api/addtocart',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
-    final httpResponse = HttpResponse(_value, _result);
-    return httpResponse;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late AddToCartResponseModel _value;
+    try {
+      _value = AddToCartResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
