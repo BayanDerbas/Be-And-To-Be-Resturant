@@ -16,6 +16,7 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> login({
     required String phonenumber,
     required String password,
+    required String device_token,
   }) async {
     print('LoginCubit: Login started for $phonenumber');
 
@@ -24,6 +25,7 @@ class LoginCubit extends Cubit<LoginState> {
     final result = await loginUseCase(
       phonenumber: phonenumber,
       password: password,
+      device_token: device_token,
     );
 
     result.fold(

@@ -13,6 +13,7 @@ class LoginRepositoryImpl implements LoginRepository {
   Future<Either<Failure, LoginUserEntity>> login({
     required String phonenumber,
     required String password,
+    required String device_token,
   }) async {
     print('LoginRepositoryImpl: Calling login API with $phonenumber / $password');
 
@@ -20,6 +21,7 @@ class LoginRepositoryImpl implements LoginRepository {
       final result = await service.login(
         password: password,
         phonenumber: phonenumber,
+        device_token: device_token,
       );
       print('LoginRepositoryImpl: API response: ${result.toJson()}');
       return Right(result);

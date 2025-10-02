@@ -23,11 +23,13 @@ class _LoginService implements LoginService {
   Future<LoginUserModel> login({
     required String password,
     required String phonenumber,
+    required String device_token,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'password': password,
       r'phonenumber': phonenumber,
+      r'device_token': device_token,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

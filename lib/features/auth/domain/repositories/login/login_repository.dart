@@ -6,5 +6,6 @@ abstract class LoginRepository{
   Future<Either<Failure,LoginUserEntity>> login ({
     required String phonenumber,
     required String password,
+    required String device_token,
 });
 }

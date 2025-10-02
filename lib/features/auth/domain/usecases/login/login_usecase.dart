@@ -10,7 +10,8 @@ class LoginUseCase{
   Future<Either<Failure,LoginUserEntity>> call ({
     required String phonenumber,
     required String password,
+    required String device_token,   
 }) async {
-    return await repository.login(phonenumber: phonenumber, password: password);
+    return await repository.login(phonenumber: phonenumber, password: password,device_token:device_token);
   }
 }

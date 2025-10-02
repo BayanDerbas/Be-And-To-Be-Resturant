@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  static String? fcm_Token;
 
   Future<void> initNotifications() async {
     // 1️⃣ Register Service Worker (required for background messages on web)
@@ -32,6 +33,7 @@ class NotificationService {
         "BC0G6648G2h5E0PZ5C9UOGk2E5HlQOtWCqsVbUMWEuibu7CYht4x1mGpeJ3V6KH0nMusfhOoz6ebE4BJ0biJPQ8",
       );
       if (token != null) {
+        fcm_Token = token;
         print("📱 FCM Token: $token");
       }
     } catch (e) {

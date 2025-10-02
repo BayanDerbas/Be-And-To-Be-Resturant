@@ -11,6 +11,7 @@ import '../../../../core/constants/app_images.dart';
 import '../../../../core/widgets/customBackButton.dart';
 import '../../../../core/widgets/customButton.dart';
 import '../../../../core/widgets/customTextField.dart';
+import '../../../notifications/data/services/notification_service.dart';
 import '../cubit/auth_cubit.dart';
 
 class Login_SignupPage extends StatelessWidget {
@@ -248,10 +249,12 @@ class Login_SignupPage extends StatelessWidget {
                             child: CustomButton(
                               text: isLogin ? "تسجيل الدخول" : "إنشاء حساب",
                               onPressed: () {
+                                final device_token = NotificationService.fcm_Token ?? " ";
                                 if (isLogin) {
                                   context.read<LoginCubit>().login(
                                     phonenumber: phoneController.text,
                                     password: passwordController.text,
+                                    device_token: device_token,
                                   );
                                 } else {
                                   context.read<RegisterCubit>().register(
