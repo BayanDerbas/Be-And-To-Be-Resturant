@@ -6,7 +6,6 @@ import 'package:web_app/core/constants/app_images.dart';
 import 'package:web_app/core/networks/api_constant.dart';
 import 'package:web_app/features/branch/domain/entities/branch_entity.dart';
 import 'package:web_app/features/developers/presentation/developers.dart';
-
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../config/animations/customLottieButton.dart';

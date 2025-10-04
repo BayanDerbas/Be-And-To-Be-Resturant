@@ -26,6 +26,7 @@ import 'package:web_app/features/branch/data/repositories/branches_repository_im
 import 'package:web_app/features/branch/domain/repositories/branches_repository.dart';
 import 'package:web_app/features/branch/domain/usecases/branches_usecase.dart';
 import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
+import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
 import 'package:web_app/features/home/data/repositories/main_category_repository_impl.dart';
 import 'package:web_app/features/home/domain/repositories/main_category_repository.dart';
@@ -46,7 +47,6 @@ import '../../features/cart/data/repositories/cart_repository_impl.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/cart/domain/usecases/add_to_cart_usecase.dart';
 import '../../features/cart/presentation/cubit/cart_cubit.dart';
-
 
 final sl = GetIt.instance;
 
@@ -197,6 +197,11 @@ Future<void> init() async {
     final repo = await sl.getAsync<CartRepository>();
     return AddToCartUseCase(repo);
   });
+  sl.registerLazySingletonAsync<CartInfoUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return CartInfoUseCase(repo);
+  });
+
   // ============================
   // Cubits
   // ============================
@@ -208,5 +213,5 @@ Future<void> init() async {
   sl.registerFactory<ProductsCubit>(() => ProductsCubit(sl<GetMainCategoriesUseCase>()));
   sl.registerFactory<ProductTypesCubit>(() => ProductTypesCubit(sl<GetMealOfCategoryUseCase>()));
   sl.registerFactory<MealTypesCubit>(() => MealTypesCubit(sl<GetTypesOfMealUseCase>()));
-  sl.registerFactory<CartCubit>(() => CartCubit(sl<CartRepository>()));
+  sl.registerFactory<CartCubit>(() => CartCubit(sl<CartRepository>(), sl<CartInfoUseCase>()));
 }

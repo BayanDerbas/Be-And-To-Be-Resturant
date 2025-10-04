@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import '../../../../core/networks/api_constant.dart';
 import '../models/add_to_cart_response_model.dart';
+import '../models/cart_info_model.dart';
 
 part 'cart_service.g.dart';
 
@@ -17,5 +18,9 @@ abstract class CartService {
       @Query('extra') int extra,
       @Query('branch_id') int branch_id,
       );
+
+  @GET('${ApiConstant.show_cart}/{branch_id}')
+  Future<CartResponseModel> showCart(@Path('branch_id') int branchId);
+
 }
 

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
+import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
 import '../../../../core/networks/failures.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../data_sources/cart_service.dart';
@@ -24,6 +25,21 @@ class CartRepositoryImpl implements CartRepository {
     } on DioException catch (err) {
       return Left(Failure.fromDioError(err));
     } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CartInfoEntity>>> showCart({required int branch_id}) async{
+    try{
+      final response = await service.showCart(branch_id);
+      print("//////Carts Info//////");
+      return Right(response.cartInfo ?? []);
+    } on DioException catch(e){
+      print("Error Cart Info Cubit : ${e.message}");
+      return Left(Failure.fromDioError(e));
+    } catch(e){
+      print("Error Cart Info Cubit : ${e.toString()}");
       return Left(Failure(e.toString()));
     }
   }

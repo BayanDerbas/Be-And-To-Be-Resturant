@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:web_app/features/order/presentation/pages/order_with_meal_id.dart';
 import '../../features/auth/presentation/pages/login&signup.dart';
 import '../../features/branch/data/models/branch_model.dart';
 import '../../features/branch/domain/entities/branch_entity.dart';
+import '../../features/branch/presentation/cubit/branch_cubit.dart';
 import '../../features/branch/presentation/pages/branchSelection.dart';
+import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../../features/cart/presentation/pages/cart.dart';
 import '../../features/developers/presentation/developers.dart';
 import '../../features/home/presentation/pages/home.dart';
@@ -67,8 +70,27 @@ class AppRouter {
       ),
       GoRoute(
         path: '/card',
-        builder: (context,state) => const Cart(),
-      )
+        builder: (context,state) {
+          final branchState = context.read<BranchCubit>().state;
+          int? branchId;
+          if (branchState is BranchSelected) {
+            branchId = branchState.branch.id;
+          }
+
+          if (branchId != null) {
+            return BlocProvider.value(
+              value: context.read<CartCubit>()..fetchCartInfo(branch_id: branchId),
+              child: Cart(branch_id: branchId),
+            );
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: Text('يرجى اختيار فرع أولاً'),
+              ),
+            );
+          }
+        },
+      ),
     ],
   );
 }

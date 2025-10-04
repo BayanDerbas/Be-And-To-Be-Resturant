@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_images.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/pages/cart.dart';
 import '../cubit/header/header_cubit.dart';
 import '../../../branch/presentation/cubit/branch_cubit.dart';
@@ -49,14 +50,31 @@ class CustomHeader extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (context) => Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: const Cart(),
-                              ),
-                            );
+                            final branchState = context.read<BranchCubit>().state;
+                            int? branchId;
+                            if (branchState is BranchSelected) {
+                              branchId = branchState.branch.id;
+                            }
+
+                            if (branchId != null) {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (context) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  // child: BlocProvider.value(
+                                  // value: context.read<CartCubit>()..fetchCartInfo(branch_id: branchId ?? 0),
+                                    child: Cart(branch_id: branchId!,),
+                                 // ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("يرجى اختيار فرع أولاً"),
+                                ),
+                              );
+                            }
                           },
                           icon: const Icon(
                             Icons.shopping_cart,
@@ -64,6 +82,23 @@ class CustomHeader extends StatelessWidget {
                             size: 30,
                           ),
                         ),
+                        // IconButton(
+                        //   onPressed: () {
+                        //     showDialog(
+                        //       context: context,
+                        //       barrierDismissible: true,
+                        //       builder: (context) => Dialog(
+                        //         backgroundColor: Colors.transparent,
+                        //         child: const Cart(),
+                        //       ),
+                        //     );
+                        //   },
+                        //   icon: const Icon(
+                        //     Icons.shopping_cart,
+                        //     color: AppColors.white,
+                        //     size: 30,
+                        //   ),
+                        // ),
                         const SizedBox(width: 5),
                         IconButton(
                           onPressed: () => print("Notifications Clicked"),

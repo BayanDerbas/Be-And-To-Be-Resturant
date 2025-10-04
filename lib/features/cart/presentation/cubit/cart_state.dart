@@ -59,6 +59,13 @@ class CartSuccess extends CartState {
   List<Object?> get props => [entity];
 }
 
+class CartInfoSuccess extends CartState {
+  final List<CartInfoEntity> entity;
+  CartInfoSuccess(this.entity);
+  @override
+  List<Object?> get props => [entity];
+}
+
 class CartError extends CartState {
   final String message;
 

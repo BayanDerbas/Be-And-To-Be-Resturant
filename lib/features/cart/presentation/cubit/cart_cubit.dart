@@ -1,20 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
+import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
 import '../../domain/repositories/cart_repository.dart';
+import '../../domain/usecases/cart_info_usecase.dart';
 import '../widgets/CustomCart.dart';
 
 part 'cart_state.dart';
 
 class CartCubit extends Cubit<CartState> {
   final CartRepository repository;
+  final CartInfoUseCase usecase;
 
-  CartCubit(this.repository)
-      : super(CartInitial(
-    items: [],
-    totalPrice: 0,
-    minOrderPrice: 50,
-  ));
+  CartCubit(this.repository, this.usecase)
+    : super(CartInitial(items: [], totalPrice: 0, minOrderPrice: 50));
 
   Future<void> addToCartApi({
     required int typeId,
@@ -33,14 +32,23 @@ class CartCubit extends Cubit<CartState> {
       branch_id: branchId,
     );
 
+    result.fold((failure) => emit(CartError(failure.message)), (entity) {
+      if (itemToAdd != null) {
+        addItem(itemToAdd);
+      }
+      emit(CartSuccess(entity));
+    });
+  }
+
+  Future<void> fetchCartInfo({required int branch_id}) async {
+    emit(CartLoading());
+    final result = await usecase.call(branch_id);
     result.fold(
-      (failure) => emit(CartError(failure.message)),
-      (entity) {
-        if (itemToAdd != null) {
-          addItem(itemToAdd);
-        }
-        emit(CartSuccess(entity));
+      (failure) {
+        emit(CartError(failure.message));
+        print("Error Cart Info Cubit : ${failure.message}");
       },
+      (list) => emit(CartInfoSuccess(list)),
     );
   }
 
@@ -64,11 +72,11 @@ class CartCubit extends Cubit<CartState> {
 
   void addItem(CartItem item) {
     if (state is! CartInitial) return;
-    
+
     final currentState = state as CartInitial;
-    final existingIndex = currentState.items.indexWhere((i) =>
-    i.name == item.name &&
-        i.type == item.type);
+    final existingIndex = currentState.items.indexWhere(
+      (i) => i.name == item.name && i.type == item.type,
+    );
 
     List<CartItem> updatedItems = List.from(currentState.items);
     if (existingIndex != -1) {
@@ -91,10 +99,12 @@ class CartCubit extends Cubit<CartState> {
 
   void removeItem(CartItem item) {
     if (state is! CartInitial) return;
-    
+
     final currentState = state as CartInitial;
-    final updatedItems = currentState.items.where((i) =>
-    !(i.name == item.name && i.type == item.type)).toList();
+    final updatedItems =
+        currentState.items
+            .where((i) => !(i.name == item.name && i.type == item.type))
+            .toList();
 
     final newTotal = _calculateTotal(updatedItems);
     emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
@@ -108,10 +118,11 @@ class CartCubit extends Cubit<CartState> {
 
   void increaseQuantity(CartItem item) {
     if (state is! CartInitial) return;
-    
+
     final currentState = state as CartInitial;
-    final index = currentState.items.indexWhere((i) =>
-    i.name == item.name && i.type == item.type);
+    final index = currentState.items.indexWhere(
+      (i) => i.name == item.name && i.type == item.type,
+    );
 
     if (index != -1) {
       final updatedItems = List<CartItem>.from(currentState.items);
@@ -132,10 +143,11 @@ class CartCubit extends Cubit<CartState> {
 
   void decreaseOrRemoveItem(CartItem item) {
     if (state is! CartInitial) return;
-    
+
     final currentState = state as CartInitial;
-    final index = currentState.items.indexWhere((i) =>
-    i.name == item.name && i.type == item.type);
+    final index = currentState.items.indexWhere(
+      (i) => i.name == item.name && i.type == item.type,
+    );
 
     if (index != -1) {
       final updatedItems = List<CartItem>.from(currentState.items);

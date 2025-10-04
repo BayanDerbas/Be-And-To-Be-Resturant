@@ -11,4 +11,5 @@ class ApiConstant {
   static const String getMeals = "$baseUrl/getmealsofcategory";
   static const String getTypesOfMeals = "$baseUrl/gettypesofmeal";
   static const String addToCart = "$baseUrl/addtocart";
+  static const String show_cart = "$baseUrl/show_cart";
 }
