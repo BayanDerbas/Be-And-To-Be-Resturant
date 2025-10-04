@@ -139,6 +139,44 @@ class _CartService implements CartService {
     return _value;
   }
 
+  @override
+  Future<ConfirmDeliveryModel> confirmDeliveryOrder(
+    int cartId,
+    String note,
+    String address,
+    String? couponId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'cart_id': cartId,
+      r'note': note,
+      r'address': address,
+      r'coupon_id': couponId,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ConfirmDeliveryModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'http://127.0.0.1:8000/api/confirm_delivery_order',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ConfirmDeliveryModel _value;
+    try {
+      _value = ConfirmDeliveryModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

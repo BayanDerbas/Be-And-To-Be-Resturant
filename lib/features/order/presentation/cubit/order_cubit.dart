@@ -57,12 +57,10 @@ class OrderCubit extends Cubit<OrderState> {
       selected = matches.isNotEmpty ? matches.first : types.first;
     }
 
-    // If support is chosen and the type supports it, use supportprice; else normal price
     final bool supportAvailableForType = (selected?.supportprice ?? 0) > 0;
     final bool useSupport = state.isSupportedAdded && supportAvailableForType;
     final int newUnitPrice = useSupport ? (selected?.supportprice ?? 0) : (selected?.price ?? 0);
 
-    // If selected type does not support supportprice, force isSupportedAdded to false
     final bool nextIsSupported = supportAvailableForType ? state.isSupportedAdded : false;
 
     emit(state.copyWith(
@@ -87,7 +85,6 @@ class OrderCubit extends Cubit<OrderState> {
     );
     final bool supportAvailableForType = (selected?.supportprice ?? 0) > 0;
     if (!supportAvailableForType) {
-      // Nothing to toggle
       return;
     }
 
@@ -111,8 +108,6 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   List<String> get allSubTypes {
-    // Current API/model does not provide sub-types inside each type.
-    // Return empty list to disable sub-type selection in UI.
     return const [];
   }
 }

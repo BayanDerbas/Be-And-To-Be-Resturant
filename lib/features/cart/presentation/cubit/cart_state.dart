@@ -6,6 +6,7 @@ abstract class CartState extends Equatable {
 }
 
 class CartInitial extends CartState {
+  final int? id;
   final List<CartItem> items;
   final int totalPrice;
   final int minOrderPrice;
@@ -13,8 +14,10 @@ class CartInitial extends CartState {
   final String? tableNumber;
   final String? note;
   final List<String> coupons;
+  final String? address;
 
   CartInitial({
+    this.id,
     this.items = const [],
     this.totalPrice = 0,
     this.minOrderPrice = 50,
@@ -22,6 +25,7 @@ class CartInitial extends CartState {
     this.tableNumber,
     this.note,
     this.coupons = const [],
+    this.address
   });
 
   CartInitial copyWith({
@@ -32,6 +36,7 @@ class CartInitial extends CartState {
     String? tableNumber,
     String? note,
     List<String>? coupons,
+    String? address,
   }) {
     return CartInitial(
       items: items ?? this.items,
@@ -41,11 +46,12 @@ class CartInitial extends CartState {
       tableNumber: tableNumber ?? this.tableNumber,
       note: note ?? this.note,
       coupons: coupons ?? this.coupons,
+      address: address ?? this.address,
     );
   }
 
   @override
-  List<Object?> get props => [items, totalPrice, minOrderPrice, selectedCoupon, tableNumber, note, coupons];
+  List<Object?> get props => [items, totalPrice, minOrderPrice, selectedCoupon, tableNumber, note, coupons,address];
 }
 
 class CartLoading extends CartState {}

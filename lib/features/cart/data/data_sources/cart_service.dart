@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 import '../../../../core/networks/api_constant.dart';
 import '../models/add_to_cart_response_model.dart';
 import '../models/cart_info_model.dart';
+import '../models/confirm_delivery_model.dart';
 import '../models/update_count_cart_model.dart';
 
 part 'cart_service.g.dart';
@@ -28,5 +29,13 @@ abstract class CartService {
 
   @POST(ApiConstant.minusone_with_cart)
   Future<UpdateCountCartModel> minusOne(@Query('item_id') int itemId);
+
+  @POST(ApiConstant.confirm_delivery_order)
+  Future<ConfirmDeliveryModel> confirmDeliveryOrder(
+      @Query('cart_id') int cartId,
+      @Query('note') String note,
+      @Query('address') String address,
+      @Query('coupon_id') String? couponId,
+      );
 }
 

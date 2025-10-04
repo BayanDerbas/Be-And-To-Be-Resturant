@@ -15,7 +15,8 @@ class ApiConstant {
   static const String addone_with_cart = "$baseUrl/addone_with_cart";
   static const String minusone_with_cart = "$baseUrl/minusone_with_cart";
   static const String show_coupons = "$baseUrl/show_coupons";
-
+  static const String confirm_delivery_order = "$baseUrl/confirm_delivery_order";
+  
 //////////
 
 }

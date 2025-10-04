@@ -30,6 +30,7 @@ import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/coupons_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/minus_one_to_cart_usecase.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_delivery_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/coupon_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/update_count_cart_cubit.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
@@ -40,6 +41,7 @@ import 'package:web_app/features/order/data/data_sources/meal_types_service.dart
 import 'package:web_app/features/order/data/repositories/meal_types_repository_impl.dart';
 import 'package:web_app/features/order/domain/repositories/get_types_of_meal_repository.dart';
 import '../../features/cart/domain/usecases/add_one_to_cart_usecase.dart';
+import '../../features/cart/domain/usecases/confirm_delivery_usecase.dart';
 import '../../features/home/data/data_services/meal_service.dart';
 import '../../features/home/data/repositories/meal_repository_impl.dart';
 import '../../features/home/domain/repositories/meal_repository.dart';
@@ -226,6 +228,10 @@ Future<void> init() async {
     final repo = await sl.getAsync<CartRepository>();
     return CouponsUseCase(repo);
   });
+  sl.registerLazySingletonAsync<ConfirmDeliveryUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return ConfirmDeliveryUseCase(repo);
+  });
   // ============================
   // Cubits
   // ============================
@@ -251,5 +257,8 @@ Future<void> init() async {
   );
   sl.registerFactory<CouponCubit>(
     () => CouponCubit(sl<CouponsUseCase>()),
+  );
+  sl.registerFactory<ConfirmDeliveryCubit>(
+        () => ConfirmDeliveryCubit(sl<ConfirmDeliveryUseCase>()),
   );
 }

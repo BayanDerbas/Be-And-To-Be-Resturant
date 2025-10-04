@@ -8,7 +8,6 @@ import '../cubit/order_cubit.dart';
 import '../widgets/CustomOrder.dart';
 import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
 
-
 class Order extends StatelessWidget {
   final MealWithTypesEntity meal;
 
@@ -85,8 +84,7 @@ class Order extends StatelessWidget {
                     amount: orderState.quantity,
                     price: orderState.totalPrice,
                     extra: orderState.isSupportedAdded ? 1 : 0,
-                    branchId: branchId,
-                    itemToAdd: cartItem,
+                    branchId: branchId, context: context,
                   );
                   cartCubit.stream.listen((cartState) {
                     if (cartState is CartSuccess) {

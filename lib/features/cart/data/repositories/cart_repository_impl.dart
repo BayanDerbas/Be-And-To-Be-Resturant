@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
 import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
+import 'package:web_app/features/cart/domain/entities/confirm_delivery_entity.dart';
 import '../../../../core/networks/failures.dart';
 import '../../domain/entities/coupon_entity.dart';
 import '../../domain/entities/update_count_cart_entity.dart';
@@ -13,7 +14,7 @@ class CartRepositoryImpl implements CartRepository {
   final CartService service;
   final CouponService service_;
 
-  CartRepositoryImpl(this.service,this.service_);
+  CartRepositoryImpl(this.service, this.service_);
 
   @override
   Future<Either<Failure, AddToCartResponseEntity>> addToCart({
@@ -24,7 +25,13 @@ class CartRepositoryImpl implements CartRepository {
     required int branch_id,
   }) async {
     try {
-      final model = await service.addToCart(type_id, amount, price, extra, branch_id);
+      final model = await service.addToCart(
+        type_id,
+        amount,
+        price,
+        extra,
+        branch_id,
+      );
       return Right(model);
     } on DioException catch (err) {
       return Left(Failure.fromDioError(err));
@@ -34,25 +41,31 @@ class CartRepositoryImpl implements CartRepository {
   }
 
   @override
-  Future<Either<Failure, List<CartInfoEntity>>> showCart({required int branch_id}) async{
-    try{
+  Future<Either<Failure, List<CartInfoEntity>>> showCart({
+    required int branch_id,
+  }) async {
+    try {
       final response = await service.showCart(branch_id);
       print("//////Carts Info//////");
       return Right(response.cartInfo ?? []);
-    } on DioException catch(e){
+    } on DioException catch (e) {
       print("Error Cart Info Cubit : ${e.message}");
       return Left(Failure.fromDioError(e));
-    } catch(e){
+    } catch (e) {
       print("Error Cart Info Cubit : ${e.toString()}");
       return Left(Failure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, UpdateCountCartEntity>> addOne({required int itemId}) async {
+  Future<Either<Failure, UpdateCountCartEntity>> addOne({
+    required int itemId,
+  }) async {
     try {
       final response = await service.addOne(itemId);
-      final entity = UpdateCountCartEntity(message: response.isNotEmpty ? response.first : null);
+      final entity = UpdateCountCartEntity(
+        message: response.isNotEmpty ? response.first : null,
+      );
       return Right(entity);
     } catch (e) {
       return Left(Failure(e.toString()));
@@ -60,7 +73,9 @@ class CartRepositoryImpl implements CartRepository {
   }
 
   @override
-  Future<Either<Failure, UpdateCountCartEntity>> minusOne({required int itemId}) async {
+  Future<Either<Failure, UpdateCountCartEntity>> minusOne({
+    required int itemId,
+  }) async {
     try {
       final response = await service.minusOne(itemId);
       return Right(response);
@@ -84,5 +99,26 @@ class CartRepositoryImpl implements CartRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, ConfirmDeliveryEntity>> confirmDeliveryOrder({
+    required int cartId,
+    required String note,
+    required String address,
+    String? couponId,
+  }) async {
+    try {
+      final response = await service.confirmDeliveryOrder(
+        cartId,
+        note,
+        address,
+        couponId,
+      );
+      final entity = response.toEntity();
+      return Right(entity);
+    } on DioException catch (e) {
+      return Left(Failure.fromDioError(e));
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
 }
-

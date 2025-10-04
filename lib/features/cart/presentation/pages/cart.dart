@@ -4,6 +4,7 @@ import 'package:web_app/config/animations/loading.dart';
 import 'package:web_app/core/constants/app_colors.dart';
 import 'package:web_app/features/cart/presentation/widgets/CustomOrderDetailsForm.dart';
 import '../cubit/cart_cubit.dart';
+import '../cubit/confirm_delivery_cubit.dart';
 import '../cubit/coupon_cubit.dart';
 import '../widgets/CustomCart.dart';
 import '../cubit/update_count_cart_cubit.dart';
@@ -20,6 +21,7 @@ class Cart extends StatelessWidget {
       final couponCubit = context.read<CouponCubit>();
       couponCubit.getCoupons(branch_id);
     });
+
 
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
@@ -41,42 +43,48 @@ class Cart extends StatelessWidget {
 
         if (state is CartInitial || state is CartInfoSuccess) {
           final cartState = state is CartInitial ? state : null;
-
-          final items = state is CartInitial
-              ? state.items
-              : (state as CartInfoSuccess)
-              .entity
-              .first
-              .cartitems
-              ?.map(
-                (item) => CartItem(
-              id: item.id ?? 0,
-              name: item.type?.meal?.name ?? "غير معروف",
-              type: item.type?.name ?? "",
-              image: item.type?.meal?.image ?? "",
-              quantity: item.amount ?? 1,
-              unitPrice: item.type?.price ?? 0,
-            ),
-          )
-              .toList() ??
-              [];
-
-          final totalPrice = state is CartInitial
-              ? state.totalPrice
-              : (state as CartInfoSuccess).entity.first.total_price ?? 0;
-          final minOrderPrice = state is CartInitial ? state.minOrderPrice : 0;
-          final selectedCoupon =
+          List<CartItem> items = [];
+          int totalPrice = 0;
+          int minOrderPrice = 0;
+          int cartId = 0;
+          var selectedCoupon =
           state is CartInitial ? state.selectedCoupon : null;
+
+          if (state is CartInitial) {
+            items = state.items;
+            totalPrice = state.totalPrice;
+            minOrderPrice = state.minOrderPrice;
+          } else if (state is CartInfoSuccess) {
+            final entityList = state.entity;
+            if (entityList.isNotEmpty) {
+              final firstEntity = entityList.first;
+              items = firstEntity.cartitems?.map((item) {
+                return CartItem(
+                  id: item.id ?? 0,
+                  name: item.type?.meal?.name ?? "غير معروف",
+                  type: item.type?.name ?? "",
+                  image: item.type?.meal?.image ?? "",
+                  quantity: item.amount ?? 1,
+                  unitPrice: item.type?.price ?? 0,
+                );
+              }).toList() ??
+                  [];
+              totalPrice = firstEntity.total_price ?? 0;
+              cartId = firstEntity.id ?? 0;
+            } else {
+              items = [];
+              totalPrice = 0;
+              cartId = 0;
+            }
+          }
+
           final coupons = couponCubit.state is CouponLoaded
               ? (couponCubit.state as CouponLoaded)
               .coupons
-              .map(
-                  (c) {
-                    final dateOnly = (c.expiresAt ?? '').split(' ').first;
-                    return '${c.code} \n الحد الأدنى للطلب :ل.س${c
-                        .minOrder}  \n نسبة الخصم :%${c
-                        .value} \n تاريخ الصلاحية : ${dateOnly} \n الحالة: ${c.isActive == 1 ? 'فعال' : 'غير فعال'}' ?? "";
-                  })
+              .map((c) {
+            final dateOnly = (c.expiresAt ?? '').split(' ').first;
+            return '${c.code} \n الحد الأدنى للطلب :ل.س${c.minOrder}  \n نسبة الخصم :%${c.value} \n تاريخ الصلاحية : ${dateOnly} \n الحالة: ${c.isActive == 1 ? 'فعال' : 'غير فعال'}';
+          })
               .toList()
               : <String>[];
 
@@ -84,6 +92,8 @@ class Cart extends StatelessWidget {
           TextEditingController(text: cartState?.tableNumber ?? '');
           final noteController =
           TextEditingController(text: cartState?.note ?? '');
+          final addressController =
+          TextEditingController(text: cartState?.address ?? '');
 
           final screenWidth = MediaQuery.of(context).size.width;
           final containerWidth =
@@ -98,7 +108,19 @@ class Cart extends StatelessWidget {
                 color: AppColors.smooky,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Customcard(
+              // ✅ Show "No Data" if empty, else show Customcard
+              child: items.isEmpty
+                  ? const Center(
+                child: Text(
+                  'لا توجد بيانات حالياً',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+                  : Customcard(
                 items: items,
                 totalPrice: totalPrice,
                 minOrderPrice: minOrderPrice,
@@ -143,7 +165,8 @@ class Cart extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -156,7 +179,8 @@ class Cart extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.green,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () => Navigator.of(context).pop(),
                           child: const Text('لا',
@@ -195,48 +219,62 @@ class Cart extends StatelessWidget {
                                 children: [
                                   const SizedBox(height: 10),
                                   ValueListenableBuilder(
-                                    valueListenable: tabController.animation!,
+                                    valueListenable:
+                                    tabController.animation!,
                                     builder: (context, value, _) {
                                       return Row(
-                                        children: List.generate(3, (index) {
-                                          final isSelected =
-                                              tabController.index == index;
-                                          return Expanded(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                tabController.animateTo(index);
-                                              },
-                                              child: AnimatedContainer(
-                                                duration: const Duration(
-                                                    milliseconds: 300),
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal:
-                                                  isSelected ? 10 : 5,
-                                                  vertical: 10,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: isSelected
-                                                      ? AppColors.orange
-                                                      : Colors.transparent,
-                                                  borderRadius:
-                                                  BorderRadius.circular(10),
-                                                ),
-                                                child: Text(
-                                                  labels[index],
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: isSelected
-                                                        ? Colors.white
-                                                        : Colors.grey,
-                                                    fontSize:
-                                                    isSelected ? 16 : 14,
-                                                    fontWeight: FontWeight.bold,
+                                        children: List.generate(3,
+                                                (index) {
+                                              final isSelected =
+                                                  tabController.index ==
+                                                      index;
+                                              return Expanded(
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    tabController
+                                                        .animateTo(index);
+                                                  },
+                                                  child: AnimatedContainer(
+                                                    duration:
+                                                    const Duration(
+                                                        milliseconds:
+                                                        300),
+                                                    padding:
+                                                    EdgeInsets.symmetric(
+                                                      horizontal: isSelected
+                                                          ? 10
+                                                          : 5,
+                                                      vertical: 10,
+                                                    ),
+                                                    decoration:
+                                                    BoxDecoration(
+                                                      color: isSelected
+                                                          ? AppColors.orange
+                                                          : Colors
+                                                          .transparent,
+                                                      borderRadius:
+                                                      BorderRadius
+                                                          .circular(10),
+                                                    ),
+                                                    child: Text(
+                                                      labels[index],
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                      style: TextStyle(
+                                                        color: isSelected
+                                                            ? Colors.white
+                                                            : Colors.grey,
+                                                        fontSize: isSelected
+                                                            ? 16
+                                                            : 14,
+                                                        fontWeight:
+                                                        FontWeight.bold,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
+                                              );
+                                            }),
                                       );
                                     },
                                   ),
@@ -254,11 +292,22 @@ class Cart extends StatelessWidget {
                                           onSelectCoupon:
                                           cartCubit.selectCoupon,
                                           onSendOrder: () {
-                                            cartCubit.updateNote(
-                                                noteController.text);
+                                            final confirmDeliveryCubit =
+                                            context.read<
+                                                ConfirmDeliveryCubit>();
+                                            confirmDeliveryCubit
+                                                .confirmDelivery(
+                                              cartId: cartId,
+                                              note: noteController.text,
+                                              address: addressController
+                                                  .text,
+                                              couponId: selectedCoupon,
+                                            );
+                                            Navigator.of(context).pop();
+                                            Navigator.of(context).pop();
                                           },
                                           addressController:
-                                          TextEditingController(),
+                                          addressController,
                                           noteController: noteController,
                                         ),
                                         CustomOrderDetailsForm(
@@ -273,6 +322,8 @@ class Cart extends StatelessWidget {
                                           onSendOrder: () {
                                             cartCubit.updateNote(
                                                 noteController.text);
+                                            Navigator.of(context).pop(); // close tab dialog
+                                            Navigator.of(context).pop(); // close cart dialog
                                           },
                                           noteController: noteController,
                                         ),
@@ -290,6 +341,8 @@ class Cart extends StatelessWidget {
                                                 noteController.text);
                                             cartCubit.updateTableNumber(
                                                 tableController.text);
+                                            Navigator.of(context).pop(); // close tab dialog
+                                            Navigator.of(context).pop(); // close cart dialog
                                           },
                                           tableNumberController:
                                           tableController,
