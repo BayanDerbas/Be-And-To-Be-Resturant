@@ -38,8 +38,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseInitializer.init();
   await di.init();
-  await NotificationService().initNotifications();
-  // Wait for all async dependencies
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    NotificationService().initNotifications();
+  });  // Wait for all async dependencies
   await di.sl.isReady<Dio>();
   await di.sl.isReady<LoginUseCase>();
   await di.sl.isReady<RegisterUseCase>();
@@ -84,6 +85,7 @@ class MyApp extends StatelessWidget {
           return ResponsiveConfig(
             context: context,
             child: MaterialApp.router(
+              scaffoldMessengerKey: NotificationService.messengerKey,
               theme: AppTheme.lightTheme,
               routerConfig: AppRouter.router,
               debugShowCheckedModeBanner: false,
