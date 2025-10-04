@@ -70,7 +70,7 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  void addItem(CartItem item) {
+  Future<void> addItem(CartItem item) async{
     if (state is! CartInitial) return;
 
     final currentState = state as CartInitial;
@@ -97,7 +97,7 @@ class CartCubit extends Cubit<CartState> {
     emit(currentState.copyWith(items: updatedItems, totalPrice: newTotal));
   }
 
-  void removeItem(CartItem item) {
+  Future<void> removeItem(CartItem item) async{
     if (state is! CartInitial) return;
 
     final currentState = state as CartInitial;
@@ -116,7 +116,7 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  void increaseQuantity(CartItem item) {
+  Future<void> increaseQuantity(CartItem item) async{
     if (state is! CartInitial) return;
 
     final currentState = state as CartInitial;
@@ -141,7 +141,7 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  void decreaseOrRemoveItem(CartItem item) {
+  Future<void> decreaseOrRemoveItem(CartItem item) async{
     if (state is! CartInitial) return;
 
     final currentState = state as CartInitial;

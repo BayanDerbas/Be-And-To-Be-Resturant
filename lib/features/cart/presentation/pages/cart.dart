@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web_app/config/animations/loading.dart';
 import 'package:web_app/core/constants/app_colors.dart';
 import 'package:web_app/features/cart/presentation/widgets/CustomOrderDetailsForm.dart';
 import '../cubit/cart_cubit.dart';
 import '../widgets/CustomCart.dart';
+import '../cubit/update_count_cart_cubit.dart';
 
 class Cart extends StatelessWidget {
   final int branch_id;
@@ -11,25 +13,19 @@ class Cart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // تحميل بيانات السلة مرة واحدة بعد بناء الواجهة
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cartCubit = context.read<CartCubit>();
-      if (cartCubit.state is! CartInfoSuccess &&
-          cartCubit.state is! CartLoading) {
-        cartCubit.fetchCartInfo(branch_id: branch_id);
-      }
+      cartCubit.fetchCartInfo(branch_id: branch_id);
     });
 
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
         final cartCubit = context.read<CartCubit>();
+        final updateCountCubit = context.read<UpdateCountCartCubit>();
 
-        // حالة التحميل
         if (state is CartLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadinDount());
         }
-
-        // حالة الخطأ
         if (state is CartError) {
           return Center(
             child: Text(
@@ -39,11 +35,9 @@ class Cart extends StatelessWidget {
           );
         }
 
-        // ✅ عرض التصميم سواء كانت الحالة CartInitial أو CartInfoSuccess
         if (state is CartInitial || state is CartInfoSuccess) {
           final cartState = state is CartInitial ? state : null;
 
-          // في حالة CartInfoSuccess نجهز البيانات القادمة من الـ API
           final items = state is CartInitial
               ? state.items
               : (state as CartInfoSuccess)
@@ -67,19 +61,14 @@ class Cart extends StatelessWidget {
               ? state.totalPrice
               : (state as CartInfoSuccess).entity.first.total_price ?? 0;
 
-          final minOrderPrice = state is CartInitial
-              ? state.minOrderPrice
-              : 0; // مؤقتًا إلى أن تأتي من الـ API
+          final minOrderPrice = state is CartInitial ? state.minOrderPrice : 0;
 
-          final selectedCoupon = state is CartInitial
-              ? state.selectedCoupon
-              : null;
-          final coupons = state is CartInitial
-              ? state.coupons
-              : [];
+          final selectedCoupon =
+          state is CartInitial ? state.selectedCoupon : null;
+          final coupons = state is CartInitial ? state.coupons : [];
 
-          final tableController = TextEditingController(
-              text: cartState?.tableNumber ?? '');
+          final tableController =
+          TextEditingController(text: cartState?.tableNumber ?? '');
           final noteController =
           TextEditingController(text: cartState?.note ?? '');
 
@@ -87,7 +76,6 @@ class Cart extends StatelessWidget {
           final containerWidth =
           screenWidth > 1000 ? 900.0 : screenWidth * 0.9;
 
-          // 🧱 نفس الديزاين تمامًا بدون أي تعديل
           return Center(
             child: Container(
               width: containerWidth,
@@ -145,8 +133,29 @@ class Cart extends StatelessWidget {
                     ),
                   );
                 },
-                onIncreaseQuantity: cartCubit.increaseQuantity,
-                onDecreaseQuantity: cartCubit.decreaseOrRemoveItem,
+
+                onIncreaseQuantity: (item) async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => Center(child: const LoadinDount()),
+                  );
+                  await updateCountCubit.addOne(item.id);
+                  Navigator.of(context).pop();
+                  cartCubit.fetchCartInfo(branch_id: branch_id);
+                },
+
+                onDecreaseQuantity: (item) async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => Center(child: const LoadinDount()),
+                  );
+                  await updateCountCubit.minusOne(item.id);
+                  Navigator.of(context).pop();
+                  cartCubit.fetchCartInfo(branch_id: branch_id);
+                },
+
                 onDeleteItem: (item) {
                   showDialog(
                     context: context,
@@ -191,7 +200,9 @@ class Cart extends StatelessWidget {
                     ),
                   );
                 },
+
                 onNext: () {
+                  // Keep design same
                   showDialog(
                     context: context,
                     builder: (context) => Dialog(
@@ -234,8 +245,7 @@ class Cart extends StatelessWidget {
                                               child: AnimatedContainer(
                                                 duration: const Duration(
                                                     milliseconds: 300),
-                                                padding:
-                                                EdgeInsets.symmetric(
+                                                padding: EdgeInsets.symmetric(
                                                   horizontal:
                                                   isSelected ? 10 : 5,
                                                   vertical: 10,
@@ -316,11 +326,8 @@ class Cart extends StatelessWidget {
                                                 noteController.text);
                                             cartCubit.updateTableNumber(
                                                 tableController.text);
-                                            print(
-                                                "sending order with table: ${tableController.text} note: ${noteController.text}");
                                           },
-                                          tableNumberController:
-                                          tableController,
+                                          tableNumberController: tableController,
                                           noteController: noteController,
                                         ),
                                       ],
@@ -348,20 +355,20 @@ class Cart extends StatelessWidget {
 
 // class Cart extends StatelessWidget {
 //   final int branch_id;
-//   const Cart({super.key,required this.branch_id});
+//   const Cart({super.key, required this.branch_id});
 //
 //   @override
 //   Widget build(BuildContext context) {
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       final cartCubit = context.read<CartCubit>();
-//       if (cartCubit.state is! CartInfoSuccess &&
-//           cartCubit.state is! CartLoading) {
-//         cartCubit.fetchCartInfo(branch_id: branch_id);
-//       }
+//       cartCubit.fetchCartInfo(branch_id: branch_id);
 //     });
+//
 //     return BlocBuilder<CartCubit, CartState>(
 //       builder: (context, state) {
-//         final cartCubit = context.read<CartCubit>()..fetchCartInfo(branch_id: branch_id);
+//         final cartCubit = context.read<CartCubit>();
+//         final updateCountCubit = context.read<UpdateCountCartCubit>();
+//
 //         if (state is CartLoading) {
 //           return const Center(child: CircularProgressIndicator());
 //         }
@@ -373,66 +380,44 @@ class Cart extends StatelessWidget {
 //             ),
 //           );
 //         }
-//         if (state is CartInfoSuccess) {
-//           final carts = state.entity;
-//           if (carts.isEmpty) {
-//             return const Center(
-//               child: Text("السلة فارغة", style: TextStyle(color: Colors.white)),
-//             );
-//           }
-//           return ListView.builder(
-//             padding: const EdgeInsets.all(16),
-//             itemCount: carts.length,
-//             itemBuilder: (context, index) {
-//               final cart = carts[index];
-//               return Card(
-//                 color: AppColors.smooky,
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 child: ExpansionTile(
-//                   title: Text(
-//                     "سلة #${cart.id} - الإجمالي: ${cart.total_price}",
-//                     style: const TextStyle(
-//                       color: Colors.white,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   children: cart.cartitems?.map((item) {
-//                     return ListTile(
-//                       leading: item.type?.meal?.image != null
-//                           ? Image.network(
-//                         "${ApiConstant.imageBase}/${item.type!.meal!.image ?? ""}",
-//                         width: 40,
-//                         height: 40,
-//                         fit: BoxFit.cover,
-//                       )
-//                           : const Icon(
-//                         Icons.fastfood,
-//                         color: Colors.white,
-//                       ),
-//                       title: Text(
-//                         item.type?.meal?.name ?? "وجبة",
-//                         style: const TextStyle(color: Colors.white),
-//                       ),
-//                       subtitle: Text(
-//                         "${item.type?.name ?? ''} | الكمية: ${item.amount} | السعر: ${item.type!.price}",
-//                         style: const TextStyle(color: Colors.grey),
-//                       ),
-//                     );
-//                   }).toList() ??
-//                       [],
-//                 ),
-//               );
-//             },
-//           );
-//         }
-//         if (state is CartInitial) {
-//           final cartState = state;
+//
+//         if (state is CartInitial || state is CartInfoSuccess) {
+//           final cartState = state is CartInitial ? state : null;
+//
+//           final items = state is CartInitial
+//               ? state.items
+//               : (state as CartInfoSuccess)
+//               .entity
+//               .first
+//               .cartitems
+//               ?.map(
+//                 (item) => CartItem(
+//               id: item.id ?? 0,
+//               name: item.type?.meal?.name ?? "غير معروف",
+//               type: item.type?.name ?? "",
+//               image: item.type?.meal?.image ?? "",
+//               quantity: item.amount ?? 1,
+//               unitPrice: item.type?.price ?? 0,
+//             ),
+//           )
+//               .toList() ??
+//               [];
+//
+//           final totalPrice = state is CartInitial
+//               ? state.totalPrice
+//               : (state as CartInfoSuccess).entity.first.total_price ?? 0;
+//
+//           final minOrderPrice = state is CartInitial ? state.minOrderPrice : 0;
+//
+//           final selectedCoupon =
+//           state is CartInitial ? state.selectedCoupon : null;
+//           final coupons = state is CartInitial ? state.coupons : [];
+//
 //           final tableController =
-//           TextEditingController(text: cartState.tableNumber ?? '');
+//           TextEditingController(text: cartState?.tableNumber ?? '');
 //           final noteController =
-//           TextEditingController(text: cartState.note ?? '');
+//           TextEditingController(text: cartState?.note ?? '');
+//
 //           final screenWidth = MediaQuery.of(context).size.width;
 //           final containerWidth =
 //           screenWidth > 1000 ? 900.0 : screenWidth * 0.9;
@@ -447,9 +432,9 @@ class Cart extends StatelessWidget {
 //                 borderRadius: BorderRadius.circular(20),
 //               ),
 //               child: Customcard(
-//                 items: cartState.items,
-//                 totalPrice: cartState.totalPrice,
-//                 minOrderPrice: cartState.minOrderPrice,
+//                 items: items,
+//                 totalPrice: totalPrice,
+//                 minOrderPrice: minOrderPrice,
 //                 onItemTap: (item) {
 //                   showDialog(
 //                     context: context,
@@ -464,8 +449,8 @@ class Cart extends StatelessWidget {
 //                         style: const TextStyle(color: Colors.white),
 //                       ),
 //                       actionsAlignment: MainAxisAlignment.spaceBetween,
-//                       actionsPadding:
-//                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//                       actionsPadding: const EdgeInsets.symmetric(
+//                           horizontal: 12, vertical: 8),
 //                       actions: [
 //                         ElevatedButton(
 //                           style: ElevatedButton.styleFrom(
@@ -477,8 +462,8 @@ class Cart extends StatelessWidget {
 //                             Navigator.of(context).pop();
 //                             cartCubit.removeItem(item);
 //                           },
-//                           child:
-//                           const Text('نعم', style: TextStyle(color: Colors.white)),
+//                           child: const Text('نعم',
+//                               style: TextStyle(color: Colors.white)),
 //                         ),
 //                         ElevatedButton(
 //                           style: ElevatedButton.styleFrom(
@@ -487,15 +472,26 @@ class Cart extends StatelessWidget {
 //                                 borderRadius: BorderRadius.circular(12)),
 //                           ),
 //                           onPressed: () => Navigator.of(context).pop(),
-//                           child:
-//                           const Text('لا', style: TextStyle(color: Colors.white)),
+//                           child: const Text('لا',
+//                               style: TextStyle(color: Colors.white)),
 //                         ),
 //                       ],
 //                     ),
 //                   );
 //                 },
-//                 onIncreaseQuantity: cartCubit.increaseQuantity,
-//                 onDecreaseQuantity: cartCubit.decreaseOrRemoveItem,
+//
+//                 // Updated increase quantity with API call
+//                 onIncreaseQuantity: (item) async {
+//                   await updateCountCubit.addOne(item.id);
+//                   cartCubit.fetchCartInfo(branch_id: branch_id);
+//                 },
+//
+//                 // Updated decrease quantity with API call
+//                 onDecreaseQuantity: (item) async {
+//                   await updateCountCubit.minusOne(item.id);
+//                   cartCubit.fetchCartInfo(branch_id: branch_id);
+//                 },
+//
 //                 onDeleteItem: (item) {
 //                   showDialog(
 //                     context: context,
@@ -510,8 +506,8 @@ class Cart extends StatelessWidget {
 //                         style: const TextStyle(color: Colors.white),
 //                       ),
 //                       actionsAlignment: MainAxisAlignment.spaceBetween,
-//                       actionsPadding:
-//                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//                       actionsPadding: const EdgeInsets.symmetric(
+//                           horizontal: 12, vertical: 8),
 //                       actions: [
 //                         ElevatedButton(
 //                           style: ElevatedButton.styleFrom(
@@ -523,8 +519,8 @@ class Cart extends StatelessWidget {
 //                             Navigator.of(context).pop();
 //                             cartCubit.removeItem(item);
 //                           },
-//                           child:
-//                           const Text('نعم', style: TextStyle(color: Colors.white)),
+//                           child: const Text('نعم',
+//                               style: TextStyle(color: Colors.white)),
 //                         ),
 //                         ElevatedButton(
 //                           style: ElevatedButton.styleFrom(
@@ -533,14 +529,16 @@ class Cart extends StatelessWidget {
 //                                 borderRadius: BorderRadius.circular(12)),
 //                           ),
 //                           onPressed: () => Navigator.of(context).pop(),
-//                           child:
-//                           const Text('لا', style: TextStyle(color: Colors.white)),
+//                           child: const Text('لا',
+//                               style: TextStyle(color: Colors.white)),
 //                         ),
 //                       ],
 //                     ),
 //                   );
 //                 },
+//
 //                 onNext: () {
+//                   // Keep design same
 //                   showDialog(
 //                     context: context,
 //                     builder: (context) => Dialog(
@@ -559,17 +557,18 @@ class Cart extends StatelessWidget {
 //                               final TabController tabController =
 //                               DefaultTabController.of(context);
 //
+//                               final labels = [
+//                                 'إرسال إلى العنوان',
+//                                 'استلام ذاتي',
+//                                 'طلب على الطاولة',
+//                               ];
+//
 //                               return Column(
 //                                 children: [
 //                                   const SizedBox(height: 10),
 //                                   ValueListenableBuilder(
 //                                     valueListenable: tabController.animation!,
 //                                     builder: (context, value, _) {
-//                                       final labels = [
-//                                         'إرسال إلى العنوان',
-//                                         'استلام ذاتي',
-//                                         'طلب على الطاولة',
-//                                       ];
 //                                       return Row(
 //                                         children: List.generate(3, (index) {
 //                                           final isSelected =
@@ -600,7 +599,8 @@ class Cart extends StatelessWidget {
 //                                                     color: isSelected
 //                                                         ? Colors.white
 //                                                         : Colors.grey,
-//                                                     fontSize: isSelected ? 16 : 14,
+//                                                     fontSize:
+//                                                     isSelected ? 16 : 14,
 //                                                     fontWeight: FontWeight.bold,
 //                                                   ),
 //                                                 ),
@@ -619,10 +619,9 @@ class Cart extends StatelessWidget {
 //                                           title: 'طلب إرسال إلى عنوان',
 //                                           includeAddress: true,
 //                                           includeTableNumber: false,
-//                                           totalPrice: cartState.totalPrice,
-//                                           selectedCoupon:
-//                                           cartState.selectedCoupon,
-//                                           availableCoupons: cartState.coupons,
+//                                           totalPrice: totalPrice,
+//                                           selectedCoupon: selectedCoupon,
+//                                           availableCoupons: ["jijh"],
 //                                           onSelectCoupon:
 //                                           cartCubit.selectCoupon,
 //                                           onSendOrder: () {
@@ -637,10 +636,9 @@ class Cart extends StatelessWidget {
 //                                           title: 'طلب استلام ذاتي',
 //                                           includeAddress: false,
 //                                           includeTableNumber: false,
-//                                           totalPrice: cartState.totalPrice,
-//                                           selectedCoupon:
-//                                           cartState.selectedCoupon,
-//                                           availableCoupons: cartState.coupons,
+//                                           totalPrice: totalPrice,
+//                                           selectedCoupon: selectedCoupon,
+//                                           availableCoupons: ["gygyugf"],
 //                                           onSelectCoupon:
 //                                           cartCubit.selectCoupon,
 //                                           onSendOrder: () {
@@ -653,10 +651,9 @@ class Cart extends StatelessWidget {
 //                                           title: 'طلب على الطاولة',
 //                                           includeAddress: false,
 //                                           includeTableNumber: true,
-//                                           totalPrice: cartState.totalPrice,
-//                                           selectedCoupon:
-//                                           cartState.selectedCoupon,
-//                                           availableCoupons: cartState.coupons,
+//                                           totalPrice: totalPrice,
+//                                           selectedCoupon: selectedCoupon,
+//                                           availableCoupons: ["uiuiuh"],
 //                                           onSelectCoupon:
 //                                           cartCubit.selectCoupon,
 //                                           onSendOrder: () {
@@ -664,8 +661,6 @@ class Cart extends StatelessWidget {
 //                                                 noteController.text);
 //                                             cartCubit.updateTableNumber(
 //                                                 tableController.text);
-//                                             print(
-//                                                 "sending order with table: ${tableController.text} note: ${noteController.text}");
 //                                           },
 //                                           tableNumberController: tableController,
 //                                           noteController: noteController,
@@ -686,6 +681,7 @@ class Cart extends StatelessWidget {
 //             ),
 //           );
 //         }
+//
 //         return const SizedBox.shrink();
 //       },
 //     );

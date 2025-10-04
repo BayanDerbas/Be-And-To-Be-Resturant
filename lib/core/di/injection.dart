@@ -27,6 +27,8 @@ import 'package:web_app/features/branch/domain/repositories/branches_repository.
 import 'package:web_app/features/branch/domain/usecases/branches_usecase.dart';
 import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
 import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/minus_one_to_cart_usecase.dart';
+import 'package:web_app/features/cart/presentation/cubit/update_count_cart_cubit.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
 import 'package:web_app/features/home/data/repositories/main_category_repository_impl.dart';
 import 'package:web_app/features/home/domain/repositories/main_category_repository.dart';
@@ -34,6 +36,7 @@ import 'package:web_app/features/home/domain/usecases/get_meals_of_category_usec
 import 'package:web_app/features/order/data/data_sources/meal_types_service.dart';
 import 'package:web_app/features/order/data/repositories/meal_types_repository_impl.dart';
 import 'package:web_app/features/order/domain/repositories/get_types_of_meal_repository.dart';
+import '../../features/cart/domain/usecases/add_one_to_cart_usecase.dart';
 import '../../features/home/data/data_services/meal_service.dart';
 import '../../features/home/data/repositories/meal_repository_impl.dart';
 import '../../features/home/domain/repositories/meal_repository.dart';
@@ -69,7 +72,9 @@ Future<void> init() async {
   // ============================
   sl.registerLazySingletonAsync<Dio>(() async {
     final refreshRepo = await sl.getAsync<RefreshRepository>();
-    return DioFactory.createDioWithRefresh(refreshRepo as RefreshRepositoryImpl);
+    return DioFactory.createDioWithRefresh(
+      refreshRepo as RefreshRepositoryImpl,
+    );
   });
 
   // ============================
@@ -201,7 +206,14 @@ Future<void> init() async {
     final repo = await sl.getAsync<CartRepository>();
     return CartInfoUseCase(repo);
   });
-
+  sl.registerLazySingletonAsync<AddOneToCartUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return AddOneToCartUseCase(repo);
+  });
+  sl.registerLazySingletonAsync<MinusOneFromCartUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return MinusOneFromCartUseCase(repo);
+  });
   // ============================
   // Cubits
   // ============================
@@ -210,8 +222,22 @@ Future<void> init() async {
   sl.registerFactory<LogoutCubit>(() => LogoutCubit(sl<LogoutUseCase>()));
   sl.registerFactory<RefreshCubit>(() => RefreshCubit(sl<RefreshUseCase>()));
   sl.registerFactory<BranchCubit>(() => BranchCubit(sl<BranchesUseCase>()));
-  sl.registerFactory<ProductsCubit>(() => ProductsCubit(sl<GetMainCategoriesUseCase>()));
-  sl.registerFactory<ProductTypesCubit>(() => ProductTypesCubit(sl<GetMealOfCategoryUseCase>()));
-  sl.registerFactory<MealTypesCubit>(() => MealTypesCubit(sl<GetTypesOfMealUseCase>()));
-  sl.registerFactory<CartCubit>(() => CartCubit(sl<CartRepository>(), sl<CartInfoUseCase>()));
+  sl.registerFactory<ProductsCubit>(
+    () => ProductsCubit(sl<GetMainCategoriesUseCase>()),
+  );
+  sl.registerFactory<ProductTypesCubit>(
+    () => ProductTypesCubit(sl<GetMealOfCategoryUseCase>()),
+  );
+  sl.registerFactory<MealTypesCubit>(
+    () => MealTypesCubit(sl<GetTypesOfMealUseCase>()),
+  );
+  sl.registerFactory<CartCubit>(
+    () => CartCubit(sl<CartRepository>(), sl<CartInfoUseCase>()),
+  );
+  sl.registerFactory<UpdateCountCartCubit>(
+    () => UpdateCountCartCubit(
+      addOneUseCase: sl<AddOneToCartUseCase>(),
+      minusOneUseCase: sl<MinusOneFromCartUseCase>(),
+    ),
+  );
 }

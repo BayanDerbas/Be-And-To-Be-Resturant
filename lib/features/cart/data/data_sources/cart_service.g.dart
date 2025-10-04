@@ -85,6 +85,60 @@ class _CartService implements CartService {
     return _value;
   }
 
+  @override
+  Future<List<String>> addOne(int itemId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'item_id': itemId};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<String>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'http://127.0.0.1:8000/api/addone_with_cart',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<String> _value;
+    try {
+      _value = _result.data!.cast<String>();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<UpdateCountCartModel> minusOne(int itemId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'item_id': itemId};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<UpdateCountCartModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'http://127.0.0.1:8000/api/minusone_with_cart',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UpdateCountCartModel _value;
+    try {
+      _value = UpdateCountCartModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
 import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
 import '../../../../core/networks/failures.dart';
+import '../../domain/entities/update_count_cart_entity.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../data_sources/cart_service.dart';
 
@@ -43,6 +44,28 @@ class CartRepositoryImpl implements CartRepository {
       return Left(Failure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, UpdateCountCartEntity>> addOne({required int itemId}) async {
+    try {
+      final response = await service.addOne(itemId);
+      final entity = UpdateCountCartEntity(message: response.isNotEmpty ? response.first : null);
+      return Right(entity);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UpdateCountCartEntity>> minusOne({required int itemId}) async {
+    try {
+      final response = await service.minusOne(itemId);
+      return Right(response);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
 }
+
 
 
