@@ -26,8 +26,11 @@ import 'package:web_app/features/branch/data/repositories/branches_repository_im
 import 'package:web_app/features/branch/domain/repositories/branches_repository.dart';
 import 'package:web_app/features/branch/domain/usecases/branches_usecase.dart';
 import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
+import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/coupons_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/minus_one_to_cart_usecase.dart';
+import 'package:web_app/features/cart/presentation/cubit/coupon_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/update_count_cart_cubit.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
 import 'package:web_app/features/home/data/repositories/main_category_repository_impl.dart';
@@ -117,6 +120,10 @@ Future<void> init() async {
     final dio = await sl.getAsync<Dio>();
     return CartService(dio);
   });
+  sl.registerLazySingletonAsync<CouponService>(() async {
+    final dio = await sl.getAsync<Dio>();
+    return CouponService(dio);
+  });
   // ============================
   // Repositories
   // ============================
@@ -155,7 +162,8 @@ Future<void> init() async {
   });
   sl.registerLazySingletonAsync<CartRepository>(() async {
     final service = await sl.getAsync<CartService>();
-    return CartRepositoryImpl(service);
+    final service_ = await sl.getAsync<CouponService>();
+    return CartRepositoryImpl(service,service_);
   });
   // ============================
   // Use Cases
@@ -214,6 +222,10 @@ Future<void> init() async {
     final repo = await sl.getAsync<CartRepository>();
     return MinusOneFromCartUseCase(repo);
   });
+  sl.registerLazySingletonAsync<CouponsUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return CouponsUseCase(repo);
+  });
   // ============================
   // Cubits
   // ============================
@@ -235,9 +247,9 @@ Future<void> init() async {
     () => CartCubit(sl<CartRepository>(), sl<CartInfoUseCase>()),
   );
   sl.registerFactory<UpdateCountCartCubit>(
-    () => UpdateCountCartCubit(
-      addOneUseCase: sl<AddOneToCartUseCase>(),
-      minusOneUseCase: sl<MinusOneFromCartUseCase>(),
-    ),
+        () => UpdateCountCartCubit(addOneUseCase: sl<AddOneToCartUseCase>(),minusOneUseCase: sl<MinusOneFromCartUseCase>()),
+  );
+  sl.registerFactory<CouponCubit>(
+    () => CouponCubit(sl<CouponsUseCase>()),
   );
 }

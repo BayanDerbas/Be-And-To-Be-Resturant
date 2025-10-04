@@ -1,16 +1,19 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
 import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
 import '../../../../core/networks/failures.dart';
+import '../../domain/entities/coupon_entity.dart';
 import '../../domain/entities/update_count_cart_entity.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../data_sources/cart_service.dart';
 
 class CartRepositoryImpl implements CartRepository {
   final CartService service;
+  final CouponService service_;
 
-  CartRepositoryImpl(this.service);
+  CartRepositoryImpl(this.service,this.service_);
 
   @override
   Future<Either<Failure, AddToCartResponseEntity>> addToCart({
@@ -65,7 +68,21 @@ class CartRepositoryImpl implements CartRepository {
       return Left(Failure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<CouponEntity>>> showAllCoupon({
+    required int branch_id,
+  }) async {
+    try {
+      final response = await service_.getAllCoupon(branch_id: branch_id);
+      final coupons = response.toEntity();
+      return Right(coupons);
+    } on DioException catch (e) {
+      return Left(Failure.fromDioError(e));
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
 }
-
-
 

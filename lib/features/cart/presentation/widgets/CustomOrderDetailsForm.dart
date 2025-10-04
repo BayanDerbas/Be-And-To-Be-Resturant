@@ -177,13 +177,22 @@ class CustomOrderDetailsForm extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: availableCoupons.map((coupon) {
-              return ListTile(
-                title: Text(
-                  coupon,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(color: AppColors.white),
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.smooky2,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      coupon,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(color: AppColors.white),
+                    ),
+                    onTap: () => Navigator.pop(context, coupon),
+                  ),
                 ),
-                onTap: () => Navigator.pop(context, coupon),
               );
             }).toList(),
           ),

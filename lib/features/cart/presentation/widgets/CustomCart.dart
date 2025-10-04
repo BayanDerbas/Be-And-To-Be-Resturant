@@ -7,7 +7,6 @@ class Customcard extends StatelessWidget {
   final List<CartItem> items;
   final int totalPrice;
   final int minOrderPrice;
-  final void Function(CartItem) onItemTap;
   final void Function(CartItem) onIncreaseQuantity;
   final void Function(CartItem) onDecreaseQuantity;
   final void Function(CartItem) onDeleteItem;
@@ -18,7 +17,6 @@ class Customcard extends StatelessWidget {
     required this.items,
     required this.totalPrice,
     required this.minOrderPrice,
-    required this.onItemTap,
     required this.onIncreaseQuantity,
     required this.onDecreaseQuantity,
     required this.onDeleteItem,
@@ -53,7 +51,6 @@ class Customcard extends StatelessWidget {
                   else
                     ...items.map(
                           (item) => GestureDetector(
-                        onTap: () => onItemTap(item),
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           padding: const EdgeInsets.all(12),

@@ -1,4 +1,6 @@
 import 'package:dartz/dartz.dart';
+import 'package:web_app/features/cart/data/models/coupon_model.dart';
+import 'package:web_app/features/cart/domain/entities/coupon_entity.dart';
 import '../../../../core/networks/failures.dart';
 import '../entities/add_to_cart_response_entity.dart';
 import '../entities/cart_info_entity.dart';
@@ -19,6 +21,7 @@ abstract class CartRepository {
 
   Future<Either<Failure, UpdateCountCartEntity>> addOne({required int itemId});
   Future<Either<Failure, UpdateCountCartEntity>> minusOne({required int itemId});
+  Future<Either<Failure,List<CouponEntity>>> showAllCoupon({required int branch_id});
   }
 
 
