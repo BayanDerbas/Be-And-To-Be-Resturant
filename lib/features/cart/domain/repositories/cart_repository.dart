@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:web_app/features/cart/data/models/coupon_model.dart';
+import 'package:web_app/features/cart/domain/entities/confirm_self_order_entity.dart';
+import 'package:web_app/features/cart/domain/entities/confirm_table_entity.dart';
 import 'package:web_app/features/cart/domain/entities/coupon_entity.dart';
 import '../../../../core/networks/failures.dart';
 import '../entities/add_to_cart_response_entity.dart';
@@ -29,7 +31,17 @@ abstract class CartRepository {
     required String address,
     String? couponId,
   });
-
+  Future<Either<Failure, ConfirmTableOrderEntity>> confirmTableOrder({
+    required int cartId,
+    required String tableNumber,
+    required String note,
+    String? couponId,
+  });
+  Future<Either<Failure, ConfirmSelfOrderEntity>> confirmSelfOrder({
+    required int cartId,
+    required String note,
+    String? couponId,
+  });
 }
 
 

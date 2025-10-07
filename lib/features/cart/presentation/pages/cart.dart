@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web_app/config/animations/loading.dart';
 import 'package:web_app/core/constants/app_colors.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_self_order_cubit.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_table_cubit.dart';
 import 'package:web_app/features/cart/presentation/widgets/CustomOrderDetailsForm.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/confirm_delivery_cubit.dart';
@@ -108,7 +110,6 @@ class Cart extends StatelessWidget {
                 color: AppColors.smooky,
                 borderRadius: BorderRadius.circular(20),
               ),
-              // ✅ Show "No Data" if empty, else show Customcard
               child: items.isEmpty
                   ? const Center(
                 child: Text(
@@ -125,26 +126,17 @@ class Cart extends StatelessWidget {
                 totalPrice: totalPrice,
                 minOrderPrice: minOrderPrice,
                 onIncreaseQuantity: (item) async {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) => const Center(child: LoadinDount()),
-                  );
+                  cartCubit.increaseQuantity(item);
                   await updateCountCubit.addOne(item.id);
-                  Navigator.of(context).pop();
+
                   cartCubit.fetchCartInfo(branch_id: branch_id);
                 },
                 onDecreaseQuantity: (item) async {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) => const Center(child: LoadinDount()),
-                  );
+                  cartCubit.decreaseOrRemoveItem(item);
                   await updateCountCubit.minusOne(item.id);
-                  Navigator.of(context).pop();
                   cartCubit.fetchCartInfo(branch_id: branch_id);
                 },
-                onDeleteItem: (item) {
+                onDeleteItem: (item) async {
                   showDialog(
                     context: context,
                     builder: (_) => AlertDialog(
@@ -153,13 +145,12 @@ class Cart extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       title: Text(
-                        'هل أنت متأكد من حذف ${item.name}?',
+                        'هل أنت متأكد من حذف ${item.name}؟',
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.white),
                       ),
                       actionsAlignment: MainAxisAlignment.spaceBetween,
-                      actionsPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                      actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       actions: [
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -168,12 +159,16 @@ class Cart extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             Navigator.of(context).pop();
-                            cartCubit.removeItem(item);
+                            await updateCountCubit.minusOne(item.id);
+                            Navigator.of(context).pop();
+                            cartCubit.fetchCartInfo(branch_id: branch_id);
                           },
-                          child: const Text('نعم',
-                              style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            'نعم',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -183,8 +178,10 @@ class Cart extends StatelessWidget {
                             ),
                           ),
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('لا',
-                              style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            'لا',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -320,10 +317,12 @@ class Cart extends StatelessWidget {
                                           onSelectCoupon:
                                           cartCubit.selectCoupon,
                                           onSendOrder: () {
-                                            cartCubit.updateNote(
-                                                noteController.text);
-                                            Navigator.of(context).pop(); // close tab dialog
-                                            Navigator.of(context).pop(); // close cart dialog
+                                            final confirmSelfOrderCubit =
+                                            context.read<
+                                                ConfirmSelfOrderCubit>();
+                                            confirmSelfOrderCubit.confirmSelfOrder(cartId: cartId, note: noteController.text,couponId: selectedCoupon);
+                                            Navigator.of(context).pop();
+                                            Navigator.of(context).pop();
                                           },
                                           noteController: noteController,
                                         ),
@@ -337,12 +336,19 @@ class Cart extends StatelessWidget {
                                           onSelectCoupon:
                                           cartCubit.selectCoupon,
                                           onSendOrder: () {
-                                            cartCubit.updateNote(
-                                                noteController.text);
-                                            cartCubit.updateTableNumber(
-                                                tableController.text);
-                                            Navigator.of(context).pop(); // close tab dialog
-                                            Navigator.of(context).pop(); // close cart dialog
+                                            final confirmTableOrderCubit =
+                                            context.read<
+                                                ConfirmTableOrderCubit>();
+                                            confirmTableOrderCubit
+                                                .confirmTableOrder(
+                                              cartId: cartId,
+                                              note: noteController.text,
+                                              tableNumber: tableController
+                                                  .text,
+                                              couponId: selectedCoupon,
+                                            );
+                                            Navigator.of(context).pop();
+                                            Navigator.of(context).pop();
                                           },
                                           tableNumberController:
                                           tableController,

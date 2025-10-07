@@ -84,7 +84,7 @@ class Order extends StatelessWidget {
                     amount: orderState.quantity,
                     price: orderState.totalPrice,
                     extra: orderState.isSupportedAdded ? 1 : 0,
-                    branchId: branchId, context: context,
+                    branchId: branchId,
                   );
                   cartCubit.stream.listen((cartState) {
                     if (cartState is CartSuccess) {

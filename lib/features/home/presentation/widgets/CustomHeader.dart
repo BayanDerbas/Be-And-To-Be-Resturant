@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../config/ResponsiveUI/responsiveConfig.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_images.dart';
-import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/pages/cart.dart';
 import '../cubit/header/header_cubit.dart';
 import '../../../branch/presentation/cubit/branch_cubit.dart';

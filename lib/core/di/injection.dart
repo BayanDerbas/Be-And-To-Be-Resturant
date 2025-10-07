@@ -28,9 +28,13 @@ import 'package:web_app/features/branch/domain/usecases/branches_usecase.dart';
 import 'package:web_app/features/branch/presentation/cubit/branch_cubit.dart';
 import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/confirm%20_table_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/confirm_self_order_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/coupons_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/minus_one_to_cart_usecase.dart';
 import 'package:web_app/features/cart/presentation/cubit/confirm_delivery_cubit.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_self_order_cubit.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_table_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/coupon_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/update_count_cart_cubit.dart';
 import 'package:web_app/features/home/data/data_services/categories_service.dart';
@@ -232,6 +236,14 @@ Future<void> init() async {
     final repo = await sl.getAsync<CartRepository>();
     return ConfirmDeliveryUseCase(repo);
   });
+  sl.registerLazySingletonAsync<ConfirmTableOrderUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return ConfirmTableOrderUseCase(repo);
+  });
+  sl.registerLazySingletonAsync<ConfirmSelfOrderUseCase>(() async {
+    final repo = await sl.getAsync<CartRepository>();
+    return ConfirmSelfOrderUseCase(repo);
+  });
   // ============================
   // Cubits
   // ============================
@@ -260,5 +272,11 @@ Future<void> init() async {
   );
   sl.registerFactory<ConfirmDeliveryCubit>(
         () => ConfirmDeliveryCubit(sl<ConfirmDeliveryUseCase>()),
+  );
+  sl.registerFactory<ConfirmTableOrderCubit>(
+        () => ConfirmTableOrderCubit(sl<ConfirmTableOrderUseCase>()),
+  );
+  sl.registerFactory<ConfirmSelfOrderCubit>(
+        () => ConfirmSelfOrderCubit(sl<ConfirmSelfOrderUseCase>()),
   );
 }

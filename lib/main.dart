@@ -6,10 +6,14 @@ import 'package:web_app/features/auth/presentation/cubit/logout/logout_cubit.dar
 import 'package:web_app/features/cart/domain/usecases/add_one_to_cart_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/add_to_cart_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/cart_info_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/confirm%20_table_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/confirm_delivery_usecase.dart';
+import 'package:web_app/features/cart/domain/usecases/confirm_self_order_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/coupons_usecase.dart';
 import 'package:web_app/features/cart/domain/usecases/minus_one_to_cart_usecase.dart';
 import 'package:web_app/features/cart/presentation/cubit/confirm_delivery_cubit.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_self_order_cubit.dart';
+import 'package:web_app/features/cart/presentation/cubit/confirm_table_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/coupon_cubit.dart';
 import 'package:web_app/features/cart/presentation/cubit/update_count_cart_cubit.dart';
 import 'package:web_app/features/home/domain/usecases/get_main_categories_usecase.dart';
@@ -60,6 +64,8 @@ void main() async {
   await di.sl.isReady<MinusOneFromCartUseCase>();
   await di.sl.isReady<CouponsUseCase>();
   await di.sl.isReady<ConfirmDeliveryUseCase>();
+  await di.sl.isReady<ConfirmTableOrderUseCase>();
+  await di.sl.isReady<ConfirmSelfOrderUseCase>();
   runApp(const MyApp());
 }
 
@@ -85,6 +91,8 @@ class MyApp extends StatelessWidget {
         BlocProvider<UpdateCountCartCubit>(create: (_) => di.sl<UpdateCountCartCubit>()),
         BlocProvider<CouponCubit>(create: (_) => di.sl<CouponCubit>()),
         BlocProvider<ConfirmDeliveryCubit>(create: (_) => di.sl<ConfirmDeliveryCubit>()),
+        BlocProvider<ConfirmTableOrderCubit>(create: (_) => di.sl<ConfirmTableOrderCubit>()),
+        BlocProvider<ConfirmSelfOrderCubit>(create: (_) => di.sl<ConfirmSelfOrderCubit>()),
         BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
       ],
       child: Builder(

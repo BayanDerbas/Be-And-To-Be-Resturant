@@ -18,12 +18,9 @@ class DioFactory {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await SecureStorage.getToken();
-          print("➡️ Sending request to: ${options.path}");
-          print("➡️ With headers before add: ${options.headers}");
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          print("➡️ Final headers: ${options.headers}");
           return handler.next(options);
         },
       ),
@@ -69,59 +66,58 @@ class DioFactory {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await SecureStorage.getToken();
-          print("➡️ Sending request to: ${options.path}");
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          print("➡️ Final headers: ${options.headers}");
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 401) {
+          if (e.response?.statusCode == 401 && !e.requestOptions.headers.containsKey('retry')
+          ) {
             try {
               final currentToken = await SecureStorage.getToken();
               if (currentToken == null) return handler.next(e);
 
-              print("🔄 Attempting token refresh for request: ${e.requestOptions.path}");
+              print("🔄 Token expired, attempting refresh...");
 
               final result = await refreshRepo.refresh("Bearer $currentToken");
 
               return await result.fold(
                     (failure) {
-                  print("❌ Failed to refresh token: ${failure.message}");
+                  print("❌ Refresh token failed: ${failure.message}");
                   return handler.next(e);
                 },
                     (model) async {
                   await SecureStorage.saveToken(model.access_token);
                   print("✅ Token refreshed: ${model.access_token}");
 
-                  // Retry request with new token
-                  final newOptions = Options(
-                    method: e.requestOptions.method,
-                    headers: {
-                      ...e.requestOptions.headers,
-                      'Authorization': 'Bearer ${model.access_token}',
-                    },
-                  );
+                  final requestOptions = e.requestOptions;
+                  requestOptions.headers['Authorization'] = 'Bearer ${model.access_token}';
+                  requestOptions.headers['retry'] = true;
 
-                  final retryResponse = await dio.request(
-                    e.requestOptions.path,
-                    data: e.requestOptions.data,
-                    queryParameters: e.requestOptions.queryParameters,
-                    options: newOptions,
+                  final response = await dio.request(
+                    requestOptions.path,
+                    data: requestOptions.data,
+                    queryParameters: requestOptions.queryParameters,
+                    options: Options(
+                      method: requestOptions.method,
+                      headers: requestOptions.headers,
+                    ),
                   );
-                  return handler.resolve(retryResponse);
+                  return handler.resolve(response);
                 },
               );
             } catch (err) {
-              print("❌ Exception during token refresh: $err");
+              print("❌ Exception during refresh: $err");
               return handler.next(e);
             }
           }
+
           return handler.next(e);
         },
       ),
     );
+
     return dio;
   }
 }

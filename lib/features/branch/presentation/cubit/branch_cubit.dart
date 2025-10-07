@@ -1,5 +1,3 @@
-//
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:web_app/features/branch/domain/entities/branches_entity.dart';
@@ -19,7 +17,6 @@ class BranchCubit extends Cubit<BranchState> {
     result.fold(
           (failure) => emit(BranchesFailure(failure.message)),
           (branchesEntity) {
-        // هنا branchesEntity لازم يكون من نوع BranchesEntity
         emit(BranchSuccess(branchesEntity));
       },
     );

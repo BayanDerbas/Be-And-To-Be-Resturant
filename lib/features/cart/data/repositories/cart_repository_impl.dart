@@ -4,11 +4,14 @@ import 'package:web_app/features/cart/data/data_sources/coupon_service.dart';
 import 'package:web_app/features/cart/domain/entities/add_to_cart_response_entity.dart';
 import 'package:web_app/features/cart/domain/entities/cart_info_entity.dart';
 import 'package:web_app/features/cart/domain/entities/confirm_delivery_entity.dart';
+import 'package:web_app/features/cart/domain/entities/confirm_self_order_entity.dart';
+import 'package:web_app/features/cart/domain/entities/confirm_table_entity.dart';
 import '../../../../core/networks/failures.dart';
 import '../../domain/entities/coupon_entity.dart';
 import '../../domain/entities/update_count_cart_entity.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../data_sources/cart_service.dart';
+import '../models/confirm_table_model.dart';
 
 class CartRepositoryImpl implements CartRepository {
   final CartService service;
@@ -121,4 +124,34 @@ class CartRepositoryImpl implements CartRepository {
       return Left(Failure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, ConfirmTableOrderEntity>> confirmTableOrder({required int cartId, required String tableNumber, required String note, String? couponId}) async {
+      try {
+        final response = await service.confirmTableOrder(
+          cartId,
+          tableNumber,
+          couponId,
+          note,
+        );
+        return Right(response.toEntity());
+      } on DioException catch (e) {
+        return Left(Failure.fromDioError(e));
+      } catch (e) {
+        return Left(Failure(e.toString()));
+      }
+  }
+
+  @override
+  Future<Either<Failure, ConfirmSelfOrderEntity>> confirmSelfOrder({required int cartId, required String note, String? couponId}) async {
+    try {
+      final response = await service.confirmSelfOrder(couponId, cartId, note);
+      return Right(response);
+    } on DioException catch (e) {
+      return Left(Failure.fromDioError(e));
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
 }

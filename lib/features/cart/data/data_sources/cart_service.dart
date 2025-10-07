@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:web_app/features/cart/data/models/confirm_self_order_model.dart';
+import 'package:web_app/features/cart/data/models/confirm_table_model.dart';
 import '../../../../core/networks/api_constant.dart';
 import '../models/add_to_cart_response_model.dart';
 import '../models/cart_info_model.dart';
@@ -37,5 +39,18 @@ abstract class CartService {
       @Query('address') String address,
       @Query('coupon_id') String? couponId,
       );
-}
 
+  @POST(ApiConstant.confirm_table_order)
+  Future<ConfirmTableOrderModel> confirmTableOrder(
+      @Query('cart_id') int cartId,
+      @Query('table_number') String tableNumber,
+      @Query('coupon_id') String? couponId,
+      @Query('note') String note,
+      );
+  @POST(ApiConstant.confirm_self_order)
+  Future<ConfirmSelfOrderModel> confirmSelfOrder(
+      @Query('coupon_id') String? couponId,
+      @Query('cart_id') int cartId,
+      @Query('note') String note,
+      );
+}
