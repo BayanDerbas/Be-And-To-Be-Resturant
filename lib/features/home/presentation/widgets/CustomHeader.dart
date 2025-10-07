@@ -98,15 +98,15 @@ class CustomHeader extends StatelessWidget {
                         //     size: 30,
                         //   ),
                         // ),
-                        const SizedBox(width: 5),
-                        IconButton(
-                          onPressed: () => print("Notifications Clicked"),
-                          icon: const Icon(
-                            Icons.notifications_none,
-                            color: AppColors.white,
-                            size: 30,
-                          ),
-                        ),
+                        // const SizedBox(width: 5),
+                        // IconButton(
+                        //   onPressed: () => print("Notifications Clicked"),
+                        //   icon: const Icon(
+                        //     Icons.notifications_none,
+                        //     color: AppColors.white,
+                        //     size: 30,
+                        //   ),
+                        // ),
                       ],
                     ),
                     Row(
