@@ -119,29 +119,60 @@ class _HomeState extends State<Home> {
                                       .loadTypesForProduct(product_id);
                                 }
                               },
-                              child: BlocBuilder<ProductsCubit, ProductsState>(
-                                builder: (context, state) {
-                                  if (state is ProductsLoaded) {
-                                    final productItems = state.categories!.map((c) {
-                                      return ProductCarouselItem(
-                                        name: c.name ?? '',
-                                        imagePath: c.image ?? AppImages.donut,
-                                      );
-                                    }).toList();
+                              child:
+                              BlocBuilder<ProductsCubit, ProductsState>(
+  builder: (context, state) {
+    if (state is ProductsLoaded) {
+      // Make sure categories is not null and not empty
+      if (state.categories == null || state.categories!.isEmpty) {
+        return const SizedBox(); // or a "No products" message
+      }
 
-                                    return CustomProductCarousel(
-                                      products: productItems,
-                                      selectedIndex: state.selectedIndex,
-                                      onItemSelected: (index) {
-                                        productsCubit.changeSelectedIndex(index);
-                                        final product_id = state.categories![index].id;
-                                        productTypesCubit.loadTypesForProduct(product_id);
-                                      },
-                                    );
-                                  }
-                                  return const SizedBox();
-                                },
-                              ),
+      final productItems = state.categories!.map((c) {
+        return ProductCarouselItem(
+          name: c.name ?? '',
+          imagePath: c.image ?? AppImages.donut,
+        );
+      }).toList();
+
+      return CustomProductCarousel(
+        products: productItems,
+        selectedIndex: state.selectedIndex,
+        onItemSelected: (index) {
+          productsCubit.changeSelectedIndex(index);
+          final product_id = state.categories![index].id;
+          productTypesCubit.loadTypesForProduct(product_id);
+        },
+      );
+    }
+
+    return const SizedBox(); // Loading or empty state
+  },
+),
+
+                              //  BlocBuilder<ProductsCubit, ProductsState>(
+                              //   builder: (context, state) {
+                              //     if (state is ProductsLoaded) {
+                              //       final productItems = state.categories!.map((c) {
+                              //         return ProductCarouselItem(
+                              //           name: c.name ?? '',
+                              //           imagePath: c.image ?? AppImages.donut,
+                              //         );
+                              //       }).toList();
+
+                              //       return CustomProductCarousel(
+                              //         products: productItems,
+                              //         selectedIndex: state.selectedIndex,
+                              //         onItemSelected: (index) {
+                              //           productsCubit.changeSelectedIndex(index);
+                              //           final product_id = state.categories![index].id;
+                              //           productTypesCubit.loadTypesForProduct(product_id);
+                              //         },
+                              //       );
+                              //     }
+                              //     return const SizedBox();
+                              //   },
+                              // ),
                             ),
                           ],
                         ),
