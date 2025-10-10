@@ -7,19 +7,28 @@ part 'url_launcher_state.dart';
 class UrlLauncherCubit extends Cubit<UrlLauncherState> {
   UrlLauncherCubit() : super(const UrlLauncherInitial());
 
-  Future<void> launchUrl(String url) async {
+  Future<void> openUrl(String url) async {
     emit(const UrlLauncherLoading());
 
     try {
+      if (url.isEmpty) {
+        emit(const UrlLauncherFailure('الرابط فارغ'));
+        return;
+      }
+
       final uri = Uri.parse(url);
+
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri as String);
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
         emit(const UrlLauncherSuccess());
       } else {
-        emit(const UrlLauncherFailure('Cannot launch URL'));
+        emit(const UrlLauncherFailure('لا يمكن فتح الرابط'));
       }
     } catch (e) {
-      emit(UrlLauncherFailure(e.toString()));
+      emit(UrlLauncherFailure('خطأ أثناء محاولة فتح الرابط: $e'));
     }
   }
 }

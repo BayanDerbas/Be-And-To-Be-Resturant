@@ -41,7 +41,8 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    selectedBranch = widget.selectedBranch ??
+    selectedBranch =
+        widget.selectedBranch ??
         ((context.read<BranchCubit>().state is BranchSelected)
             ? (context.read<BranchCubit>().state as BranchSelected).branch
             : null);
@@ -49,7 +50,6 @@ class _HomeState extends State<Home> {
     if (selectedBranch != null) {
       context.read<BranchCubit>().selectBranch(selectedBranch!);
       context.read<ProductsCubit>().loadProducts(selectedBranch!.id);
-
     }
   }
 
@@ -69,14 +69,19 @@ class _HomeState extends State<Home> {
       debugPrint("📷 Image: ${ApiConstant.imageBase}/${selectedBranch.image}");
     }
 
-    double contentWidth = (responsive.isDesktop || responsive.isTablet)
-        ? 800
-        : MediaQuery.of(context).size.width;
+    double contentWidth =
+        (responsive.isDesktop || responsive.isTablet)
+            ? 800
+            : MediaQuery.of(context).size.width;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final productsState = productsCubit.state;
-      if (productsState is ProductsLoaded) {
-        final product_id = productsState.categories![productsState.selectedIndex].id;
+      if (productsState is ProductsLoaded &&
+          productsState.categories != null &&
+          productsState.categories!.isNotEmpty &&
+          productsState.selectedIndex < productsState.categories!.length) {
+        final product_id =
+            productsState.categories![productsState.selectedIndex].id;
         productTypesCubit.loadTypesForProduct(product_id);
       }
     });
@@ -85,9 +90,7 @@ class _HomeState extends State<Home> {
       create: (_) => ScrollToTopCubit(headerCubit.scrollController),
       child: Scaffold(
         backgroundColor: AppColors.smooky,
-        endDrawer: CustomDrawer(
-          onLogout: () => context.go('/login_signup'),
-        ),
+        endDrawer: CustomDrawer(onLogout: () => context.go('/login_signup')),
         body: NotificationListener<ScrollNotification>(
           onNotification: (scrollNotification) {
             headerCubit.changeHeaderColor(scrollNotification.metrics.pixels);
@@ -112,67 +115,58 @@ class _HomeState extends State<Home> {
                             const SizedBox(height: 3),
                             BlocListener<ProductsCubit, ProductsState>(
                               listener: (context, state) {
-                                if (state is ProductsLoaded) {
+                                if (state is ProductsLoaded &&
+                                    state.categories != null &&
+                                    state.categories!.isNotEmpty &&
+                                    state.selectedIndex <
+                                        state.categories!.length) {
                                   final product_id =
                                       state.categories![state.selectedIndex].id;
-                                  productTypesCubit
-                                      .loadTypesForProduct(product_id);
+                                  productTypesCubit.loadTypesForProduct(
+                                    product_id,
+                                  );
                                 }
                               },
-                              child:
-                              BlocBuilder<ProductsCubit, ProductsState>(
-  builder: (context, state) {
-    if (state is ProductsLoaded) {
-      // Make sure categories is not null and not empty
-      if (state.categories == null || state.categories!.isEmpty) {
-        return const SizedBox(); // or a "No products" message
-      }
+                              child: BlocBuilder<ProductsCubit, ProductsState>(
+                                builder: (context, state) {
+                                  if (state is ProductsLoaded) {
+                                    if (state.categories == null ||
+                                        state.categories!.isEmpty) {
+                                      return const Center(
+                                        child: Text(
+                                          "لا توجد منتجات حالياً",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      );
+                                    }
+                                    final productItems =
+                                        state.categories!.map((c) {
+                                          return ProductCarouselItem(
+                                            name: c.name ?? '',
+                                            imagePath:
+                                                c.image ?? AppImages.donut,
+                                          );
+                                        }).toList();
 
-      final productItems = state.categories!.map((c) {
-        return ProductCarouselItem(
-          name: c.name ?? '',
-          imagePath: c.image ?? AppImages.donut,
-        );
-      }).toList();
+                                    return CustomProductCarousel(
+                                      products: productItems,
+                                      selectedIndex: state.selectedIndex,
+                                      onItemSelected: (index) {
+                                        productsCubit.changeSelectedIndex(
+                                          index,
+                                        );
+                                        final product_id =
+                                            state.categories![index].id;
+                                        productTypesCubit.loadTypesForProduct(
+                                          product_id,
+                                        );
+                                      },
+                                    );
+                                  }
 
-      return CustomProductCarousel(
-        products: productItems,
-        selectedIndex: state.selectedIndex,
-        onItemSelected: (index) {
-          productsCubit.changeSelectedIndex(index);
-          final product_id = state.categories![index].id;
-          productTypesCubit.loadTypesForProduct(product_id);
-        },
-      );
-    }
-
-    return const SizedBox(); // Loading or empty state
-  },
-),
-
-                              //  BlocBuilder<ProductsCubit, ProductsState>(
-                              //   builder: (context, state) {
-                              //     if (state is ProductsLoaded) {
-                              //       final productItems = state.categories!.map((c) {
-                              //         return ProductCarouselItem(
-                              //           name: c.name ?? '',
-                              //           imagePath: c.image ?? AppImages.donut,
-                              //         );
-                              //       }).toList();
-
-                              //       return CustomProductCarousel(
-                              //         products: productItems,
-                              //         selectedIndex: state.selectedIndex,
-                              //         onItemSelected: (index) {
-                              //           productsCubit.changeSelectedIndex(index);
-                              //           final product_id = state.categories![index].id;
-                              //           productTypesCubit.loadTypesForProduct(product_id);
-                              //         },
-                              //       );
-                              //     }
-                              //     return const SizedBox();
-                              //   },
-                              // ),
+                                  return const SizedBox();
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -191,31 +185,34 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 45),
                     CustomFooter(
-                      phoneNumbers: (selectedBranch?.phonenumbers ?? [])
-                          .map((phone) => phone.phone.toString())
-                          .toList(),
+                      phoneNumbers:
+                          (selectedBranch?.phonenumbers ?? [])
+                              .map((phone) => phone.phone.toString())
+                              .toList(),
                       logoAsset: AppImages.logo_header,
                       facebookUrl: selectedBranch?.facebooktoken ?? '',
                       instagramUrl: selectedBranch?.instagramtoken ?? '',
-                      mapsUrl: (selectedBranch?.length != null &&
-                          selectedBranch?.width != null)
-                          ? "https://maps.google.com/?q=${selectedBranch!.length},${selectedBranch.width}"
-                          : '',
+                      mapsUrl:
+                          (selectedBranch?.length != null &&
+                                  selectedBranch?.width != null)
+                              ? "https://maps.google.com/?q=${selectedBranch!.length},${selectedBranch.width}"
+                              : '',
                       privacyPolicyText: 'سياسة الخصوصية',
                       onPrivacyPolicyTap: () {
                         showDialog(
                           context: context,
-                          builder: (_) => Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            backgroundColor: Colors.transparent,
-                            child: const Privacy(),
-                          ),
+                          builder:
+                              (_) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                backgroundColor: Colors.transparent,
+                                child: const Privacy(),
+                              ),
                         );
                       },
                       onSocialTap: (String url) {
-                        context.read<UrlLauncherCubit>().launchUrl(url);
+                        context.read<UrlLauncherCubit>().openUrl(url);
                       },
                     ),
                     const SizedBox(height: 5),
@@ -241,7 +238,8 @@ class _HomeState extends State<Home> {
                                 backgroundColor: Colors.transparent,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
+                                    top: Radius.circular(20),
+                                  ),
                                 ),
                               );
                             },
@@ -253,15 +251,16 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Builder(
-                builder: (context) => CustomHeader(
-                  onAboutTap: () {
-                    Scrollable.ensureVisible(
-                      _aboutSectionKey.currentContext!,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                ),
+                builder:
+                    (context) => CustomHeader(
+                      onAboutTap: () {
+                        Scrollable.ensureVisible(
+                          _aboutSectionKey.currentContext!,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
               ),
               BlocBuilder<ScrollToTopCubit, bool>(
                 builder: (context, showButton) {
@@ -269,9 +268,9 @@ class _HomeState extends State<Home> {
 
                   double screenWidth = MediaQuery.of(context).size.width;
                   double leftPosition =
-                  (responsive.isDesktop || responsive.isTablet)
-                      ? (screenWidth - contentWidth) / 2 - 60
-                      : 10;
+                      (responsive.isDesktop || responsive.isTablet)
+                          ? (screenWidth - contentWidth) / 2 - 60
+                          : 10;
 
                   return Positioned(
                     bottom: 20,
